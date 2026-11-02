@@ -1,0 +1,35 @@
+"""all settings configs"""
+
+from dataclasses import dataclass, field
+from typing import List
+
+
+@dataclass
+class Config:
+    # --- Seats ---------------------------------------------------------------
+    # Direction of each participant's chair, in degrees, from the robot's point
+    # of view: 0 = straight ahead, + = robot's LEFT, - = robot's RIGHT.
+    # (TODO: replaced by values measured in calibration.)
+    seat_azimuths_deg: List[float] = field(default_factory=lambda: [50.0, 0.0, -50.0])
+
+    # --- Facilitation schedule (identical in both conditions) ----------------
+    turn_interval_s: float = 5.0      # time between robot turns (study: e.g. 30 s)
+    n_turns: int = 6                  # number of times the robot addresses someone
+
+    # --- What the robot says: ids from prompts/script.json ----------------------
+    intro_prompt: str = "intro"
+    question_prompt: str = "question_1"
+    invite_prompt: str = "invite"
+    outro_prompt: str = "outro"
+
+    # --- Robot motion ----------------------------------------------------------
+    move_duration_s: float = 0.8
+    body_share: float = 0.6           # part of the turn done by the body (rest by the head)
+
+    # --- Baseline policy --------------------------------------------------------
+    shuffle_each_round: bool = True   # True: random order each round (still equal turns)
+    seed: int = 0                     # fixed seed -> the same sequence every run
+
+    # --- Connection -------------------------------------------------------------
+    host: str = "reachy-mini.local"   # only used for --target wireless
+    log_dir: str = "logs"

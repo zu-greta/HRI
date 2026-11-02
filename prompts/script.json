@@ -1,0 +1,7 @@
+{
+  "_comment": "Everything the robot can say. Same files in both conditions. After editing, run: python make_prompts.py",
+  "intro": "Hello everyone, I am Reachy. I will guide your discussion today. Please share your ideas with each other.",
+  "invite": "What do you think?",
+  "question_1": "Here is the first question. If you could add one new subject to every school, what would it be, and why?",
+  "outro": "Thank you all. That is the end of this discussion."
+}

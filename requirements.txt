@@ -1,1 +1,12 @@
-uv pip install "reachy-mini[mujoco]"
+# Python 3.11, 3.12 or 3.13 (3.12 recommended). Reachy Mini SDK 1.13 needs >= 3.11.
+#
+# The SDK version MUST match the daemon you connect to:
+#   - the simulator in Reachy Mini Control (currently 1.13.0)
+#   - later: the lab robot (check http://<robot>:8000/api/daemon/status -> "version")
+# If the robot turns out to have another version, change it here and re-run setup.
+reachy-mini[mujoco]==1.13.0   # SDK + MuJoCo (lets you also run the simulator from the command line)
+
+requests>=2.33.0              # talk to the daemon's REST API (sound direction, sounds)
+numpy>=2.2.5                  # same minimum as reachy-mini 1.13.0
+pytest>=8.0                   # unit tests
+pyttsx3>=2.90; sys_platform == "win32"   # text-to-speech for make_prompts.py on Windows (macOS uses `say`)
