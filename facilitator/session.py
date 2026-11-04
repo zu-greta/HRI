@@ -21,8 +21,8 @@ def run_session(robot, policy: Policy, source: SpeakerSource, cfg: Config, log: 
         log.log("robot_say_end", detail=prompt)
 
     for turn in range(1, cfg.n_turns + 1):
-        # ---- listening phase (TODO: read `source`, attribute speech, update tracker)
-        _wait(cfg.turn_interval_s, source, tracker)
+        # ---- listening phase (TODO: attribute speech to a seat, update tracker)
+        wait_for_silence(robot, source, cfg, log)
 
         # ---- decision: the ONLY thing that differs between conditions
         seat = policy.choose(tracker.speaking_time_s, history)
@@ -38,6 +38,9 @@ def run_session(robot, policy: Policy, source: SpeakerSource, cfg: Config, log: 
         robot.say(cfg.invite_prompt)
         log.log("robot_say_end", seat=seat + 1, detail=cfg.invite_prompt)
 
+    # ---- give the group a chance to answer the last invitation
+    wait_for_silence(robot, source, cfg, log)
+
     robot.face_group()
     log.log("robot_say_start", detail=cfg.outro_prompt)
     robot.say(cfg.outro_prompt)
@@ -46,13 +49,44 @@ def run_session(robot, policy: Policy, source: SpeakerSource, cfg: Config, log: 
     return tracker
 
 
-def _wait(seconds: float, source: SpeakerSource, tracker: SpeakingTracker, tick_s: float = 0.1) -> None:
-    """Wait for the listening phase while polling the speaker source.
+def wait_for_silence(robot, source: SpeakerSource, cfg: Config, log: SessionLog,
+                     clock=time.monotonic, sleep=time.sleep, tick_s: float = 0.1) -> str:
+    """Listen until the group has finished talking, and return why listening ended.
 
-    PLACEHOLDER: readings are ignored for now. Later: attribution.py turns each
-    reading into a seat and calls tracker.add_speech(seat, tick_s).
+        "silence"      someone spoke, then nobody spoke for cfg.silence_s
+        "no_response"  the microphones worked, but nobody spoke for cfg.no_response_s
+        "no_data"      as above, but the source never returned a reading
+        "max_listen"   cfg.max_listen_s was reached (even if someone is still talking)
     """
-    end = time.time() + seconds
-    while time.time() < end:
+    while robot.is_speaking():  # the robot's own voice and echo must not count as speech
         source.read()
-        time.sleep(min(tick_s, max(0.0, end - time.time())))
+        sleep(tick_s)
+
+    log.log("listen_start")
+    start = last_speech = previous = clock()
+    heard_speech = got_data = False
+    speech_s = 0.0
+
+    while True:
+        now = clock()
+        reading = source.read()
+        got_data = got_data or reading is not None
+        if reading is not None and reading.speech_detected:
+            heard_speech = True
+            last_speech = now
+            speech_s += now - previous
+        previous = now
+
+        if now - start >= cfg.max_listen_s:
+            reason = "max_listen"
+        elif heard_speech and now - last_speech >= cfg.silence_s:
+            reason = "silence"
+        elif not heard_speech and now - start >= cfg.no_response_s:
+            reason = "no_response" if got_data else "no_data"
+        else:
+            sleep(tick_s)
+            continue
+
+        log.log("listen_end", detail=f"reason={reason} waited_s={now - start:.1f} speech_s={speech_s:.1f}")
+        print(f"   [listening ended] {reason} after {now - start:.1f} s ({speech_s:.1f} s of speech)")
+        return reason

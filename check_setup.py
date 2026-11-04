@@ -35,7 +35,7 @@ try:
 except PackageNotFoundError:
     sdk_version = None
     report(False, "reachy-mini not installed -> run the setup script / pip install -r requirements.txt")
-for pkg in ("requests", "numpy", "pytest"):
+for pkg in ("requests", "numpy", "pytest", "sounddevice"):
     try:
         report(True, f"{pkg} {version(pkg)}")
     except PackageNotFoundError:

@@ -7,8 +7,8 @@ Where the sound comes out:
                        and in light mode its audio is switched off).
 
 say() blocks until the sentence has finished, so the session timing is the same
-every time. is_speaking() will be used later to ignore the microphones while
-the robot hears its own voice.
+every time. is_speaking() lets the session ignore the microphones while the
+robot hears its own voice.
 """
 
 import json

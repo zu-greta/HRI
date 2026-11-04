@@ -13,8 +13,16 @@ class Config:
     seat_azimuths_deg: List[float] = field(default_factory=lambda: [50.0, 0.0, -50.0])
 
     # --- Facilitation schedule (identical in both conditions) ----------------
-    turn_interval_s: float = 5.0      # time between robot turns (study: e.g. 30 s)
     n_turns: int = 6                  # number of times the robot addresses someone
+
+    # --- Listening: when is it time for the next turn? ---------------------------
+    silence_s: float = 3.0            # after someone spoke: this much silence ends the turn
+    no_response_s: float = 10.0       # if nobody speaks at all: move on after this long
+    max_listen_s: float = 60.0        # hard limit per turn, even if someone is still talking
+
+    # --- Laptop microphone (simulator only) --------------------------------------
+    mic_threshold_ratio: float = 3.0  # speech = this many times louder than the measured room
+    mic_min_level: float = 0.01       # ... and never below this level (0-1 scale)
 
     # --- What the robot says: ids from prompts/script.json ----------------------
     intro_prompt: str = "intro"
