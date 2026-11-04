@@ -1,4 +1,4 @@
-"""Where "is someone speaking?" comes from.
+"""detection sources locations
 
 Every source returns, when asked, the latest reading:
     Reading(angle_rad, speech_detected)   or   None (no data)
@@ -80,13 +80,7 @@ class RobotDoASource(SpeakerSource):
 
 
 class LaptopMicSource(SpeakerSource):
-    """This computer's microphone, for rehearsing in the simulator with real voices.
-
-    Speech means "louder than the room": the first calibrate_s seconds measure
-    the background noise, so the room must be quiet when it starts. Any loud
-    sound counts as speech, and there is no direction (the angle is always
-    straight ahead). The robot's own speech detector works differently, so
-    results from this source say nothing about how well the robot will hear.
+    """[GRETA] - testing simulation on laptop
     """
 
     SAMPLE_RATE = 16000
@@ -125,10 +119,9 @@ class LaptopMicSource(SpeakerSource):
 
 
 class KeyboardSource(SpeakerSource):
-    """Pretend to be the participants in the simulator, which has no microphone.
+    """[GRETA] - TESTING simulation with keyboard (no microphone)
 
-    Press or hold 1/2/3 in the terminal: that seat counts as speaking until
-    hold_s after the last key press.
+    Press or hold 1/2/3 in the terminal: that seat counts as speaking until hold_s after the last key press.
     """
 
     def __init__(self, seat_azimuths_deg: Sequence[float], hold_s: float = 0.6, clock=time.monotonic):

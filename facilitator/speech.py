@@ -3,8 +3,7 @@
 Where the sound comes out:
     output="robot"  -> the robot's own speaker (real robot). Each file is uploaded
                        once to the daemon, then played with /api/media/play_sound.
-    output="laptop" -> this computer's speakers (simulator: it has no speaker,
-                       and in light mode its audio is switched off).
+    output="laptop" -> this computer's speakers 
 
 say() blocks until the sentence has finished, so the session timing is the same
 every time. is_speaking() lets the session ignore the microphones while the

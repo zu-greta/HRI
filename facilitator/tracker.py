@@ -1,6 +1,6 @@
 """Speaking time per seat.  (Simple working version; attribution comes later.)
 
-TODO (later):
+TODO:
   - convert microphone angle (head frame) -> world azimuth using the head pose
   - map world azimuth -> nearest seat within a tolerance (or None)
   - debounce, and ignore readings while the robot itself is speaking
