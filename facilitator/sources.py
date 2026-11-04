@@ -1,10 +1,20 @@
-"""detection sources locations
+"""Speech sources: where the 0.1 s microphone readings come from.
 
 Every source returns, when asked, the latest reading:
     Reading(angle_rad, speech_detected)   or   None (no data)
 
-angle convention (same as the robot's microphone array):
-    0 = robot's left,  pi/2 = straight ahead,  pi = robot's right
+angle convention (same as the robot's microphone array, which sits in the HEAD):
+    0 = head's left,  pi/2 = straight ahead of the head,  pi = head's right
+The angle is relative to where the head points, not to the room.
+
+    RobotDoASource   STUDY: the real robot's microphone array (REST /api/state/doa)
+    NullSource       no audio (the robot cannot hear anyone)
+    LaptopMicSource  SIMULATOR TESTING: loudness from this computer's microphone. It has no
+                     direction, so every sound is reported straight ahead = credited to the seat
+                     the head currently faces. Tests the session flow, NOT the balancing.
+    KeyboardSource   SIMULATOR TESTING: press 1/2/3 = that seat is speaking (direction is
+                     simulated correctly for the current head yaw)
+Simulated groups and replay of recordings live in sim_sources.py.
 """
 
 import math
@@ -14,7 +24,7 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 import numpy as np
 import requests
@@ -80,7 +90,11 @@ class RobotDoASource(SpeakerSource):
 
 
 class LaptopMicSource(SpeakerSource):
-    """[GRETA] - testing simulation on laptop
+    """SIMULATOR TESTING: this computer's microphone as a speech on/off detector (no direction).
+
+    Needs the `sounddevice` package. Every reading points straight ahead (pi/2), so all
+    speech is credited to the seat the robot is facing; use --source scripted or keyboard
+    to test the balancing itself.
     """
 
     SAMPLE_RATE = 16000
@@ -119,13 +133,18 @@ class LaptopMicSource(SpeakerSource):
 
 
 class KeyboardSource(SpeakerSource):
-    """[GRETA] - TESTING simulation with keyboard (no microphone)
+    """SIMULATOR TESTING: keyboard instead of a microphone.
 
-    Press or hold 1/2/3 in the terminal: that seat counts as speaking until hold_s after the last key press.
+    Press or hold 1/2/3 in the terminal: that seat counts as speaking until hold_s after the
+    last key press. The reported angle is what the head-mounted array would measure for that
+    seat at the CURRENT head yaw (incl. front/back mirroring), so attribution stays correct
+    after the robot turns its head.
     """
 
-    def __init__(self, seat_azimuths_deg: Sequence[float], hold_s: float = 0.6, clock=time.monotonic):
+    def __init__(self, seat_azimuths_deg: Sequence[float], hold_s: float = 0.6, clock=time.monotonic,
+                 head_yaw_deg: Callable[[], float] = lambda: 0.0):
         self.seat_azimuths_deg = list(seat_azimuths_deg)
+        self._head_yaw = head_yaw_deg
         self.hold_s = hold_s
         self._clock = clock
         self._seat = 0
@@ -156,8 +175,14 @@ class KeyboardSource(SpeakerSource):
             if key.isdecimal() and 1 <= int(key) <= len(self.seat_azimuths_deg):
                 self._seat = int(key) - 1
                 self._speaking_until = now + self.hold_s
-        angle = math.pi / 2 - math.radians(self.seat_azimuths_deg[self._seat])
-        return Reading(angle, now < self._speaking_until)
+        from .attribution import expected_mic_head_deg  # local import: attribution does not import sources
+
+        try:
+            yaw = float(self._head_yaw())
+        except Exception:  # noqa: BLE001 - robot not connected yet
+            yaw = 0.0
+        head_deg = expected_mic_head_deg(self.seat_azimuths_deg[self._seat], yaw)
+        return Reading(math.pi / 2 - math.radians(head_deg), now < self._speaking_until)
 
     def close(self) -> None:
         if self._saved_tty is not None:

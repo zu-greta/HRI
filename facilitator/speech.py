@@ -5,11 +5,21 @@ Where the sound comes out:
                        once to the daemon, then played with /api/media/play_sound.
     output="laptop" -> this computer's speakers 
 
+    output="silent" -> no sound, same timing (tests, dry runs)
+
 say() blocks until the sentence has finished, so the session timing is the same
-every time. is_speaking() lets the session ignore the microphones while the
-robot hears its own voice.
+every time. is_speaking() stays True for ECHO_MARGIN_S after the sound ends, so the
+session ignores the microphones while the robot hears its own voice and the echo.
+Because say() blocks, the listening loop does NOT run while the robot talks: the tick
+log only contains the echo margin (robot_speaking = 1), not the whole prompt.
+
+STUDY RULE (controlled variable "same voice"): prompts/*.wav are generated ONCE with
+make_prompts.py and committed. auto_generate must be False for real-robot sessions
+(run_session.py does this), so a missing file stops the session instead of being
+silently re-synthesised with a different computer's voice.
 """
 
+import hashlib
 import json
 import platform
 import shutil
@@ -36,6 +46,7 @@ class Speaker:
             k: v for k, v in json.loads((self.dir / "script.json").read_text()).items() if not k.startswith("_")
         }
         self.durations: Dict[str, float] = {}
+        self.audio_hash = ""  # fingerprint of all prompt audio, logged so every round provably used the same files
         self._speaking_until = 0.0
         self._http = requests.Session()
 
@@ -52,10 +63,14 @@ class Speaker:
                 synthesize(self.texts[pid], self.dir / f"{pid}.wav")
             missing = []
         if missing:
-            raise FileNotFoundError(f"Missing audio for {missing}. Run:  python make_prompts.py")
-        for pid in self.texts:
-            with wave.open(str(self.dir / f"{pid}.wav")) as w:
+            raise FileNotFoundError(f"Missing audio for {missing}. Run:  python make_prompts.py  and commit the .wav files")
+        digest = hashlib.sha1()
+        for pid in sorted(self.texts):
+            path = self.dir / f"{pid}.wav"
+            with wave.open(str(path)) as w:
                 self.durations[pid] = w.getnframes() / w.getframerate()
+            digest.update(path.read_bytes())
+        self.audio_hash = digest.hexdigest()[:10]
         if self.output == "robot":
             for pid in self.texts:
                 with open(self.dir / f"{pid}.wav", "rb") as f:
@@ -70,7 +85,7 @@ class Speaker:
             raise KeyError(f"unknown prompt {prompt_id!r}; add it to prompts/script.json")
         duration = self.durations.get(prompt_id, 0.0)
         print(f'   [robot says] "{self.texts[prompt_id]}"')
-        self._speaking_until = time.time() + duration + ECHO_MARGIN_S
+        self._speaking_until = time.monotonic() + duration + ECHO_MARGIN_S
 
         if self.output == "robot":
             r = self._http.post(f"{self.base_url}/api/media/play_sound",
@@ -84,7 +99,7 @@ class Speaker:
         return duration
 
     def is_speaking(self) -> bool:
-        return time.time() < self._speaking_until
+        return time.monotonic() < self._speaking_until
 
 
 def _play_locally(path: Path, duration: float) -> None:

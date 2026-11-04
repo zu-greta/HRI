@@ -4,10 +4,11 @@
 #   - the simulator in Reachy Mini Control (currently 1.13.0)
 #   - later: the lab robot (check http://<robot>:8000/api/daemon/status -> "version")
 # If the robot turns out to have another version, change it here and re-run setup.
-reachy-mini[mujoco]==1.13.0   # SDK + MuJoCo (lets you also run the simulator from the command line)
+reachy-mini[mujoco]==1.13.0   # SDK + MuJoCo (run the sim from CLI)
 
 requests>=2.33.0              # talk to the daemon's REST API (sound direction, sounds)
 numpy>=2.2.5                  # same minimum as reachy-mini 1.13.0
+sounddevice>=0.4.6            # laptop microphone in the simulator (--source laptop / auto on --target sim)
 pytest>=8.0                   # unit tests
-sounddevice>=0.5              # laptop microphone, for testing with real voices in the simulator
+scipy>=1.11                   # statistics in analyze_study.py / evaluate_offline.py (Wilcoxon)
 pyttsx3>=2.90; sys_platform == "win32"   # text-to-speech for make_prompts.py on Windows (macOS uses `say`)

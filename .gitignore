@@ -3,11 +3,19 @@ reachy-mini-workspace/
 */__pycache__/
 .DS_Store
 logs/
+data/
+videos/
+*.mp4
+*.mov
+results/
+# sim_scenario.py voice cache
+.scenario_voices/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class
+.pytest_cache/
 
 # C extensions
 *.so

@@ -1,11 +1,12 @@
-"""Per-tick log: 10 rows per second while the robot listens or talks.
+"""Per-tick log: 10 rows per second while the robot listens (and during the 0.5 s echo
+margin after it speaks; there are no rows while a prompt plays or the robot turns).
 
 Written next to the session log as <group>_<condition>_<time>_ticks.csv. It holds
 the RAW microphone readings plus the head angle, so any detection method can be
 re-run on a recorded session later (sim_sources.ReplaySource, evaluate_offline.py).
 
 Columns:
-  t               session clock (time.monotonic(), seconds)
+  t               session clock (time.monotonic(), seconds) = mono_s in the event log
   angle_rad       raw microphone angle (0 = head's left, pi/2 = front, pi = right); empty = no reading
   speech          raw speech flag from the robot (1/0)
   head_yaw_deg    head direction in the room (+ = robot's left)

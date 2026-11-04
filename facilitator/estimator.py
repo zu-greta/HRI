@@ -4,11 +4,12 @@ one score per seat (lower = quieter)
 functions:
     update(seat or None, dt, now) is called every tick with the attributed speaker
 
-    CumulativeEstimator  - BASELINE (Micbot: "the person who had cumulatively spoken the least overall"). Every attributed tick counts, from the start.
+    CumulativeEstimator  - BASELINE (Micbot: the person who had cumulatively spoken the least). Every attributed tick counts, from the start.
     TurnDecayEstimator   - OUR METHOD, 2 changes:
     1. Speaking turns vs backchannels. Ticks grouped into utterances (pauses shorter than merge_gap_s are bridged). 
         Utterances shorter than min_turn_s ("mm-hm", "yeah", laughter, a cough) are backchannels: counted separately, not participation.
-        Micbot's results separate speaking turns from backchannels, but its tracker counted every sound the same.
+        Micbot's video analysis separated speaking turns from backchanneling, but its robot was
+        driven by cumulative speaking time from the microphone array; no such distinction is described.
     2. Recent speech weighs more. Each finished turn is added with an exponential decay of half-life half_life_s. 
         With a cumulative total, someone who dominated the first minutes and then went quiet is never invited, and a
         quiet person who has just started contributing keeps being targeted.

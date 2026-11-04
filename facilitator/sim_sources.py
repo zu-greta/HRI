@@ -1,14 +1,21 @@
-"""simulation sources 
+"""Simulated microphones + replay of recordings + ground-truth labels.
 
+[GRETA] - placeholder values until calibrated on the real robot
+
+SIMULATION
 MicModel        - imitates the robot's microphone array: angle noise, outliers,
                   missed speech, false alarms, the array turning with the head,
                   and front/back mirroring. PLACEHOLDER noise values; fit them on
                   real recordings (evaluate_offline.py fit) and copy them here.
 ScriptedSource  - a scripted group, e.g. "seat 1 talks a lot, seat 3 hardly", for
                   the simulator (--source scripted) and for tests.
+ANALYSIS
 iter_ticks()    - reads a *_ticks.csv recorded on the real robot (offline replay).
 ReplaySource    - the same recording as a live SpeakerSource.
-load_labels()   - hand-made ground truth: who spoke when.
+load_labels()   - ground truth: who spoke when (video annotation or run_calibration.py).
+                  CSV header start_s,end_s,seat[,kind]; seat 1-based; optional kind =
+                  "turn" (default) or "backchannel".
+truth_at()      - the labelled speaker at time t (None = silence OR overlapping speech).
 """
 
 import csv
@@ -93,21 +100,36 @@ class ReplaySource(SpeakerSource):
         return 0.0 if self.current is None else self.current.head_yaw_deg
 
 
-def load_labels(path: str, offset_s: float = 0.0) -> List[Tuple[float, float, int]]:
-    """Ground truth CSV with header start_s,end_s,seat (seat 1-based).
+def load_labels(path: str, offset_s: float = 0.0, kinds: Sequence[str] = ("turn", "backchannel")
+                ) -> List[Tuple[float, float, int]]:
+    """Ground truth CSV with header start_s,end_s,seat[,kind] (seat 1-based).
 
     offset_s is added to every time to move label time (e.g. video time) onto the
     tick-log clock: tick_t = label_t + offset_s.
+    kind (optional column) is "turn" (default when empty/missing) or "backchannel";
+    `kinds` selects which rows are returned (e.g. kinds=("turn",) for speaking turns only).
     """
     out = []
     with open(path, newline="") as f:
         for row in csv.DictReader(f):
+            kind = (row.get("kind") or "turn").strip().lower()
+            if kind not in kinds:
+                continue
             out.append((float(row["start_s"]) + offset_s, float(row["end_s"]) + offset_s, int(row["seat"]) - 1))
     return sorted(out)
 
 
 def truth_at(labels: List[Tuple[float, float, int]], t: float) -> Optional[int]:
+    """The labelled speaker at time t, or None for silence (first match if labels overlap)."""
     for a, b, s in labels:
         if a <= t < b:
             return s
     return None
+
+
+def is_overlap(labels: List[Tuple[float, float, int]], t: float) -> bool:
+    """True if two different seats are labelled as speaking at time t.
+
+    Overlapping speech has no single correct seat, so H2/H3 exclude these ticks.
+    """
+    return len({s for a, b, s in labels if a <= t < b}) > 1

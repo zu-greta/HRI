@@ -16,7 +16,7 @@ from typing import List, Optional, Sequence
 class Policy:
     name = "base"
 
-    def choose(self, speaking_time_s: Sequence[float], history: List[int]) -> int:
+    def choose(self, activity: Sequence[float], history: List[int]) -> int:
         raise NotImplementedError
 
 
@@ -46,7 +46,7 @@ class RoundRobinPolicy(Policy):
                 order[0], order[-1] = order[-1], order[0]
         return order
 
-    def choose(self, speaking_time_s: Sequence[float], history: List[int]) -> int:
+    def choose(self, activity: Sequence[float], history: List[int]) -> int:
         if not self._queue:
             last = history[-1] if history else -1
             self._queue = self._new_round(last)
@@ -65,7 +65,7 @@ class UniformRandomPolicy(Policy):
         self.n_seats = n_seats
         self._rng = random.Random(seed)
 
-    def choose(self, speaking_time_s: Sequence[float], history: List[int]) -> int:
+    def choose(self, activity: Sequence[float], history: List[int]) -> int:
         return self._rng.randrange(self.n_seats)
 
 
@@ -96,8 +96,8 @@ class LeastActivePolicy(Policy):
         self.n_seats, self.margin, self.repeat_margin = n_seats, margin, repeat_margin
         self.max_consecutive = max_consecutive
 
-    def choose(self, speaking_time_s: Sequence[float], history: List[int]) -> int:
-        scores = list(speaking_time_s)
+    def choose(self, activity: Sequence[float], history: List[int]) -> int:
+        scores = list(activity)
         lowest = min(scores)
         candidates = [k for k in range(self.n_seats) if scores[k] - lowest <= self.margin]
         candidates.sort(key=lambda k: (_last_addressed(history, k), scores[k], k))
@@ -116,9 +116,12 @@ class LeastActivePolicy(Policy):
 
 
 class MicbotPolicy(Policy):
-    """Micbot (Tennent et al., HRI 2019): the person who has cumulatively spoken the least.
+    """Micbot (Tennent, Shen & Jung, HRI 2019): the person who has cumulatively spoken the least.
 
-    NOTE: used as comparison for improvement - not in study.
+    Micbot's "encourage" action turned to whoever had cumulatively spoken least (tracked with
+    a Kinect microphone array), every 3 minutes. Combined with NearestSeatAttributor and
+    CumulativeEstimator this is our re-implementation of that rule on our hardware.
+    OFFLINE COMPARISON ONLY (evaluate_offline.py) - never a study condition.
     """
 
     name = "micbot_least_cumulative"
@@ -126,8 +129,8 @@ class MicbotPolicy(Policy):
     def __init__(self, n_seats: int):
         self.n_seats = n_seats
 
-    def choose(self, speaking_time_s: Sequence[float], history: List[int]) -> int:
-        return min(range(self.n_seats), key=lambda k: (speaking_time_s[k], k))
+    def choose(self, activity: Sequence[float], history: List[int]) -> int:
+        return min(range(self.n_seats), key=lambda k: (activity[k], k))
 
 
 def make_policy(condition: str, n_seats: int, shuffle: bool, seed: int, det: Optional[object] = None,
@@ -144,4 +147,4 @@ def make_policy(condition: str, n_seats: int, shuffle: bool, seed: int, det: Opt
         return LeastActivePolicy(n_seats, det.margin_s, det.repeat_margin_s, det.max_consecutive)
     if condition == "micbot":
         return MicbotPolicy(n_seats)
-    raise ValueError(f"unknown condition {condition!r} (use 'baseline' or 'adaptive')")
+    raise ValueError(f"unknown condition {condition!r} (use 'baseline', 'adaptive' or 'micbot')")

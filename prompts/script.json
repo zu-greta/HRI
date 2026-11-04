@@ -1,7 +1,19 @@
 {
-  "_comment": "Everything the robot can say. Same files in both conditions. After editing, run: python make_prompts.py",
+  "_comment": "Everything the robot can say. Same files in both conditions. After editing, run: python make_prompts.py --voice <one fixed voice> on ONE computer and commit prompts/*.wav + manifest.json. The topic questions (t1_*, t2_*) are PLACEHOLDERS - replace with the piloted questions (report Table 2). Keep the 'What do you think:' opening so every addressed question has the same form.",
   "intro": "Hello everyone, I am Reachy. I will guide your discussion today. Please share your ideas with each other.",
-  "invite": "What do you think?",
-  "question_1": "Here is the first question. If you could add one new subject to every school, what would it be, and why?",
+  "t1_open": "Let's start with something to the whole group. What is one skill you wish school had taught you?",
+  "t1_q1": "What do you think: should school start later in the morning?",
+  "t1_q2": "What do you think: which subject should every student learn, and why?",
+  "t1_q3": "What do you think: are exams a good way to show what someone has learned?",
+  "t1_q4": "What do you think: should students be allowed to use AI for homework?",
+  "t1_q5": "What do you think: what makes a teacher really good?",
+  "t1_q6": "What do you think: if you could change one thing about university, what would it be?",
+  "t2_open": "Let's start with something to the whole group. What is your favourite way to spend a free afternoon?",
+  "t2_q1": "What do you think: is it better to travel alone or with friends?",
+  "t2_q2": "What do you think: which city would you most like to visit, and why?",
+  "t2_q3": "What do you think: are holidays better when they are planned, or spontaneous?",
+  "t2_q4": "What do you think: should people take more breaks from their phones?",
+  "t2_q5": "What do you think: what makes a weekend feel well spent?",
+  "t2_q6": "What do you think: what is one hobby everyone should try once?",
   "outro": "Thank you all. That is the end of this discussion."
 }

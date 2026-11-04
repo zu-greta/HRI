@@ -1,4 +1,4 @@
-"""Check that everything is ready. Run it after setup and whenever something breaks.
+"""setup sanity check
 
     python check_setup.py                    # simulator / Lite on this computer
     python check_setup.py --target wireless  # Wireless robot on the network

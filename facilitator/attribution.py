@@ -3,14 +3,15 @@
     - angle 0 = head's left, pi/2 = head's front, pi = head's right
 - notes: 
     - array turns with the head so the same person gives a different angle depending on where the robot looks
-    - [GRETA] for now, since of the current seating plan, the array only resolves left-right: 
+    - the array only resolves left-right:
     a voice 100 deg to the left (slightly behind) is reported as 80 deg to the left ("front/back mirroring"). 
     This happens in our study, because the robot faces one side seat (e.g. -50 deg) 
     while the opposite seat (+50 deg) is 100 deg away.
 
 
 2 attributors (same interface):
-NearestSeatAttributor  - BASELINE (Micbot-style). Each reading on its own:
+NearestSeatAttributor  - BASELINE (Micbot-style; Micbot's Kinect array was fixed, ours turns with the head).
+                         Each reading on its own:
                          room angle = mic angle + head yaw -> nearest seat.
 HMMAttributor          - OUR METHOD. An online hidden Markov model (forward filter)
                          over the states {silence, seat 1..N}:

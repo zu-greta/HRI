@@ -34,7 +34,7 @@ class Robot:
 
     @property
     def base_url(self) -> str:
-        """REST API of the daemon (used later for sound direction and playing sounds)."""
+        """REST API of the daemon (microphone direction /api/state/doa, sound upload and playback)."""
         return f"http://{self.host if self.target == 'wireless' else 'localhost'}:8000"
 
     # ------------------------------------------------------------- lifecycle
@@ -65,6 +65,8 @@ class Robot:
         The head pose is given in world coordinates, so yaw=azimuth makes the head
         face the seat while the body rotates body_share of the way (keeps the
         head-body difference small, max allowed is 65 deg).
+        goto_target is expected to block for duration (verify on the real robot); the
+        session does not read the microphones while the robot moves.
         """
         from reachy_mini.utils import create_head_pose
 
@@ -86,6 +88,10 @@ class Robot:
         return self.speaker.is_speaking()
 
     def head_yaw_deg(self) -> Optional[float]:
-        """Current head yaw in world coordinates (for checks and later for DoA correction)."""
+        """Current head yaw in the room frame, degrees, + = robot's left.
+
+        Used every tick to turn the head-relative microphone angle into a room direction.
+        VERIFY ON THE REAL ROBOT: after turn_to(+50) this must read about +50.
+        """
         pose = self.mini.get_current_head_pose()
         return math.degrees(math.atan2(pose[1, 0], pose[0, 0]))

@@ -1,7 +1,11 @@
 """participant seating from robot POV
-[GRETA] - placeholder values to be replaced by calibration on the real robot 
-    use: python evaluate_offline.py fit --ticks ... --labels ... 
-    which writes seats.json. When seats.json exists it is used instead.
+
+[GRETA] PLACEHOLDER until calibrated. run_session.py replaces this with seats.json when it exists.
+
+Placeholder values until calibrated on the real robot:
+    python run_calibration.py --target lite        (records ticks + labels)
+    python evaluate_offline.py fit --ticks ... --labels ...   (writes seats.json)
+When seats.json exists it is used instead. Commit seats.json; the chairs must not move afterwards.
 
 Angles are in degrees in the ROOM (world) frame, measured from the robot's
 neutral forward direction: 0 = straight ahead, + = robot's LEFT, - = robot's RIGHT.

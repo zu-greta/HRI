@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
-from .seats import PLACEHOLDER_SEAT_AZIMUTHS_DEG  # [GRETA] placeholder seats live in seats.py
+from .seats import PLACEHOLDER_SEAT_AZIMUTHS_DEG  # placeholder seats live in seats.py
 
 
 @dataclass
@@ -11,12 +11,12 @@ class Config:
     # --- Seats ---------------------------------------------------------------
     # Direction of each participant's chair, in degrees, from the robot's point
     # of view: 0 = straight ahead, + = robot's LEFT, - = robot's RIGHT.
-    # [GRETA]PLACEHOLDER until calibrated. run_session.py replaces this with seats.json
-    # when that file exists 
+    # [GRETA] PLACEHOLDER until calibrated. run_session.py replaces this with seats.json when it exists.
     seat_azimuths_deg: List[float] = field(default_factory=lambda: list(PLACEHOLDER_SEAT_AZIMUTHS_DEG))
 
     # --- Facilitation schedule (identical in both conditions) ----------------
-    # [GRETA] 2 rounds per group, one topic per round, 6 questions per topic. each qurstion addressed to one participant chosen by policy
+    # 2 rounds per group, one topic per round, 6 questions per topic; each question is
+    # addressed to one participant chosen by the policy.
     # Each topic also has a warm-up question asked to the whole group first (same in both conditions), so the robot has heard everyone before its first decision.
     topic: int = 1
     n_turns: int = 6                  # number of addressed questions (= decisions) per round
@@ -25,7 +25,7 @@ class Config:
     silence_s: float = 3.0            # after someone spoke: this much silence ends the turn
     no_response_s: float = 10.0       # if nobody speaks at all: move on after this long
     max_listen_s: float = 60.0        # hard limit per turn, even if someone is still talking
-                                      # NOTE: 7 listening phases x ~60 s + robot speech ~ 8 min per round
+                                      # NOTE: 7 listening phases x up to 60 s + robot speech <= ~8 min per round
 
     # --- Laptop microphone (simulator only) --------------------------------------
     mic_threshold_ratio: float = 3.0  # speech = this many times louder than the measured room
@@ -35,7 +35,7 @@ class Config:
     intro_prompt: str = "intro"
     outro_prompt: str = "outro"
 
-    # [GRETA - testing] ids in prompts/script.json: (warm-up to everyone, [6 addressed questions])
+    # ids in prompts/script.json: (warm-up to everyone, [6 addressed questions])
     topic_prompts: Dict[int, Tuple[str, List[str]]] = field(default_factory=lambda: {
         1: ("t1_open", [f"t1_q{i}" for i in range(1, 7)]),
         2: ("t2_open", [f"t2_q{i}" for i in range(1, 7)]),
@@ -46,11 +46,12 @@ class Config:
     body_share: float = 0.6           # part of the turn done by the body (rest by the head)
 
     # --- Baseline policy --------------------------------------------------------
-    # [GRETA] "balanced": random order, but everyone addressed equally often (2 of 6 each).
-    # "uniform": every choice independently random - can leave someone never addressed (~26% of rounds with 6 choices)
+    # "balanced" (STUDY DEFAULT): random order, but everyone addressed equally often (2 of 6 each).
+    # "uniform": every choice independently random - can leave someone never addressed
+    #            (~26% of rounds with 6 choices). The design report must name the one used.
     baseline: str = "balanced"
     shuffle_each_round: bool = True   # True: random order each round (still equal turns)
-    seed: int = 0                     # fixed seed -> the same sequence every run
+    seed: int = 0                     # run_session.py derives it from group + round (reproducible)
 
     # --- Connection -------------------------------------------------------------
     host: str = "reachy-mini.local"   # only used for --target wireless

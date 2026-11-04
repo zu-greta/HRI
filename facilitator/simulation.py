@@ -1,4 +1,8 @@
-"""simulates groups to evaluate detection methods before study
+"""Simulated groups
+
+[GRETA] - placeholder values until calibrated on the real robot
+
+Simulated groups, used to evaluate detection methods before (and besides) the study.
 
 A simulated session follows the real session logic: the robot invites someone, the
 group talks until it goes quiet, the robot decides whom to invite next and turns

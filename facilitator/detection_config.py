@@ -1,5 +1,12 @@
-"""detection for passive/active - parameters
-[GRETA] replace all the PLACEHOLDER configs with the calibrated values
+"""Parameters of the detection (who is speaking, how active everyone is) and the adaptive policy.
+
+Defaults here; detection_params.json (written by `evaluate_offline.py fit` and by hand
+after `evaluate_offline.py tune`) overrides them. The four microphone-model values are
+PLACEHOLDERS until fitted on a calibration recording from the real robot.
+
+[GRETA] replace the placeholders with the fitted values 
+
+Freeze detection_params.json before the first participant group (report: "fixed after offline tuning").
 """
 
 import json

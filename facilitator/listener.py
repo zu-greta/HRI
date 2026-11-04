@@ -1,8 +1,9 @@
-"""[GRETA] hook here! 
+"""THE HOOK between the session (Alyssa) and detection (Greta)
 
     session.py (Alyssa)                             detection (Greta)
     ─────────────────────                           ───────────────────────
-    every 0.1 s, while listening AND while the robot talks:
+    every 0.1 s while listening (incl. the 0.5 s echo margin after the robot speaks;
+    nothing is read while say()/turn_to() block):
         tick = listener.update(reading, now,       ─> attribution.py  who is speaking?
                                robot_speaking,     estimator.py    how active is everyone?
                                head_yaw_deg)       ─> Tick (written to *_ticks.csv)
@@ -15,6 +16,7 @@ rules:
   * `now`, t_start and t_end all use time.monotonic() (the session clock);
   * head_yaw_deg = robot.head_yaw_deg() (room frame, + = robot's left);
   * robot_speaking = robot.is_speaking(); readings during the robot's own voice are ignored but still logged.
+  * add_transcript is an optional extension (no speech-to-text is built); words are logged, not scored.
 """
 
 from collections import deque

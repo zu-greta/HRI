@@ -35,9 +35,3 @@ Evaluating if a robot facilitator that tracks each person's speaking time and tu
 
 
 ---
-
-# TODO
-- requirements.txt
-- code for a baseline robot that chooses addressees at random
-- code for a robot that tracks each person's speaking time and turns toward the least active participant
-    - TODO: algo to set!

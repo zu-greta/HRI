@@ -2,14 +2,11 @@
 
     python make_prompts.py                  # uses the computer's default voice
     python make_prompts.py --voice Samantha # macOS voice (list them: say -v '?')
-    python make_prompts.py --only invite    # regenerate one sentence
+    python make_prompts.py --only t1_q3     # regenerate one sentence
 
-Why pre-recorded files instead of live speech or an LLM?
-    The study needs the robot to say EXACTLY the same thing, in the same voice
-    and with the same timing, in both conditions. Generate the files ONCE on one
-    computer and commit prompts/*.wav to git, so every teammate and every
-    session uses identical audio.
-
+Pre-recorded prompts are a controlled variable (same content, same voice in all conditions):
+generate them ONCE on ONE computer with ONE --voice, then commit prompts/*.wav and
+prompts/manifest.json. Never regenerate during data collection.
 Voices: macOS `say`, Windows pyttsx3, Linux espeak-ng (see facilitator/tts.py).
 """
 
