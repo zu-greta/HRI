@@ -43,4 +43,18 @@ def test_session_turns_to_every_seat_and_logs(tmp_path):
     assert rows[0]["event"] == "session_start" and rows[-1]["event"] == "session_end"
     assert sum(r["event"] == "decision" for r in rows) == 6
     # [STUDY ALIGNMENT] intro, warm-up to everyone, 6 addressed questions of topic 1, outro
+    questions = [p for p in robot.said if p.startswith("t1_q")]
+    assert robot.said[:2] == ["intro", "t1_open"] and robot.said[-1] == "outro"
+    assert questions == [f"t1_q{i}" for i in range(1, 7)]
+    # every question is preceded by the number of the participant the robot turned to
+    decisions = [int(r["seat"]) for r in rows if r["event"] == "decision"]
+    for i, seat in enumerate(decisions):
+        assert robot.said[2 + 2 * i: 4 + 2 * i] == [f"addr_{seat}", f"t1_q{i + 1}"]
+
+
+def test_participant_number_can_be_switched_off(tmp_path):
+    cfg = Config(n_turns=6, no_response_s=0.0, max_listen_s=0.0, log_dir=str(tmp_path), address_prompts=[])
+    robot, log = FakeRobot(), SessionLog("G00", "baseline", cfg.log_dir)
+    run_session(robot, RoundRobinPolicy(3, seed=0), NullSource(), cfg, log)
+    log.close()
     assert robot.said == ["intro", "t1_open"] + [f"t1_q{i}" for i in range(1, 7)] + ["outro"]

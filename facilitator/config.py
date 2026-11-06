@@ -35,6 +35,12 @@ class Config:
     intro_prompt: str = "intro"
     outro_prompt: str = "outro"
 
+    # Said right before each addressed question, after the robot has turned to that seat
+    # ("Participant two." -> "What do you think: ..."). One id per seat: seat k = participant k,
+    # so participants are told their number = the number of their (labelled) chair.
+    # Same in both conditions. Set to [] to address people by head direction only.
+    address_prompts: List[str] = field(default_factory=lambda: ["addr_1", "addr_2", "addr_3"])
+
     # ids in prompts/script.json: (warm-up to everyone, [6 addressed questions])
     topic_prompts: Dict[int, Tuple[str, List[str]]] = field(default_factory=lambda: {
         1: ("t1_open", [f"t1_q{i}" for i in range(1, 7)]),

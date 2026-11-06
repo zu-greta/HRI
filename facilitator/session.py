@@ -2,7 +2,8 @@
 
 One round:
     intro (to everyone) -> warm-up question (to everyone)
-    6 x [ listen until quiet -> decide whom to address -> turn to them -> ask the question ]
+    6 x [ listen until quiet -> decide whom to address -> turn to them
+          -> say their number ("Participant two.") -> ask the question ]
     listen until quiet (answer to the last question) -> outro
 
 Detection (the listener) runs in BOTH conditions, so the robot's estimate is logged for
@@ -61,6 +62,11 @@ def run_session(robot, policy: Policy, source: SpeakerSource, cfg: Config, log: 
 
         robot.turn_to(cfg.seat_azimuths_deg[seat], antennas_deg=(20, -20))
         log.log("robot_turn", seat=seat + 1)
+        if cfg.address_prompts:  # say the participant's number first, e.g. "Participant two."
+            name = cfg.address_prompts[seat]
+            log.log("robot_say_start", seat=seat + 1, detail=name)
+            robot.say(name)
+            log.log("robot_say_end", seat=seat + 1, detail=name)
         log.log("robot_say_start", seat=seat + 1, detail=question)
         robot.say(question)  # the question is addressed to the chosen person (the robot is facing them)
         log.log("robot_say_end", seat=seat + 1, detail=question)

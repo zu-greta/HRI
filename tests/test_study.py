@@ -21,6 +21,15 @@ def test_both_topics_have_a_warmup_and_six_questions_with_audio_text():
         assert all(pid in script for pid in [warmup, *questions])
 
 
+def test_every_seat_has_a_participant_number_prompt():
+    import json
+
+    script = json.loads((ROOT / "prompts" / "script.json").read_text())
+    cfg = Config()
+    assert len(cfg.address_prompts) == len(cfg.seat_azimuths_deg)
+    assert all(pid in script for pid in cfg.address_prompts)
+
+
 def test_baseline_options():
     assert isinstance(make_policy("baseline", 3, True, 0), RoundRobinPolicy)
     assert isinstance(make_policy("baseline", 3, True, 0, baseline="uniform"), UniformRandomPolicy)

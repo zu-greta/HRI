@@ -25,6 +25,7 @@ Everything you need to do for the session / robot / study side, in order. For ba
   - Keep the same form for all addressed questions: open, low-stakes, starting with "What do you think: …".
   - Aim for similar length across the two topics; the report says "topics piloted for similar amounts of talk".
 - [ ] Check `intro` and `outro`. The intro is also the **video sync point**, so do not make it start with silence.
+- [ ] Check `addr_1`…`addr_3` ("Participant one." …). The robot says the number right after turning, before each question. Seat k = participant k.
 - [ ] On **one** computer, with **one** fixed voice: `python make_prompts.py --voice <name>`. On macOS, list voices with `say -v '?'`.
 - [ ] Listen to every file in `prompts/`.
 - [ ] Commit `prompts/*.wav` **and** `prompts/manifest.json`. Never regenerate them after the pilot.
@@ -56,6 +57,7 @@ Everything you need to do for the session / robot / study side, in order. For ba
   - Order B swaps the conditions: round 1 `adaptive`, round 2 `baseline`. Topic always follows the round.
   - Put the quiet participant in a seat decided in advance. Vary the seat across groups so that seat and quietness are not confounded.
 - [ ] Write the **experimenter script**: the same words for every group. Say nothing during the rounds and stay out of view.
+  - At seating, tell each person their participant number (= chair number) and that the robot will call them by it.
   - Order of events: consent → pre-questionnaire → seating → camera on → round 1 → post-questionnaire → round 2 → post-questionnaire + end question → debrief.
 
 ---
@@ -80,6 +82,7 @@ Use `python run_session.py --target lite --turns 2 --group CONV --no-response 20
 
 ### B3. Room
 - [ ] Fix the robot position and three chairs, and **mark the floor with tape**. Chairs at roughly −50°, 0° and +50° from the robot, about 1–1.5 m away. Nothing may move after calibration.
+- [ ] **Label the chairs 1, 2, 3** (and give each participant a matching name card): **1 = robot's left (+50°), 2 = middle (0°), 3 = robot's right (−50°)**. The robot says "Participant <n>" by seat, so the number a participant is given must be the number of the chair they sit in.
 - [ ] Same room and lighting for every group. No fans, music or open doors.
 - [ ] **Camera**: all three faces and the robot in frame, with good audio, started **before** the intro. The intro start is the sync point.
 
