@@ -2,8 +2,13 @@
 
     python run_session.py                                  # baseline, simulator, laptop microphone
     python run_session.py --condition adaptive --source scripted   # simulator, simulated group
-    python run_session.py --target lite --group G01 --round 1 --topic 1 --order A \
-                          --condition baseline --quiet-seat 2       # a real study round (USB robot)
+    python run_session.py --target wireless --record --group G01 --round 1 --topic 1 --order A \
+                          --condition baseline --quiet-seat 2       # a real study round (Wireless robot)
+    (add --host <robot IP> if reachy-mini.local is not found)
+
+--record records the room with this computer's microphone (or --record-device "USB"),
+saved in the folder you run this command from as <log name>_audio.wav (+ _audio.json
+with the sync offset). Use --record-dir to save somewhere else.
 
 For a quick look at a whole session without any setup: python sim_scenario.py --no-robot --fast
 
@@ -25,6 +30,7 @@ from facilitator.seats import load_seat_azimuths
 from facilitator.sim_sources import MicModel, ScriptedSource  
 from facilitator.ticklog import TickLog  
 from facilitator.logger import SessionLog
+from facilitator.recorder import AudioRecorder  # [RECORDING]
 from facilitator.policies import make_policy
 from facilitator.robot_io import TARGETS, Robot
 from facilitator.session import run_session
@@ -121,6 +127,14 @@ def main() -> None:
     # choose detection methods (defaults: our method; the alternatives exist for comparison)
     p.add_argument("--attributor", choices=("hmm", "nearest"), help="who-is-speaking method (default: hmm)")
     p.add_argument("--estimator", choices=("turns_decay", "cumulative"), help="activity measure (default: turns_decay)")
+    # [RECORDING] room audio for annotation, saved next to the logs and synced with them
+    p.add_argument("--record", action="store_true",
+                   help="record the room with this computer's microphone (<log>_audio.wav, ~2 MB/min)")
+    p.add_argument("--record-device", help="microphone to record with (name or part of it; see check_recording.py --list)")
+    p.add_argument("--record-dir", default=".",
+                   help="folder for the recordings (default: the folder you run this command from)")
+    p.add_argument("--no-pause", action="store_true",
+                   help="with --record: start the round immediately (no 'press Enter' for the seat introductions)")
     args = p.parse_args()
     cfg.n_turns, cfg.host, cfg.topic, cfg.baseline = args.turns, args.host, args.topic, args.baseline
     # a different but reproducible random order for every group and round
@@ -154,6 +168,26 @@ def main() -> None:
     print(f"Voice output: {output}")
     log.log("versions", detail=f"code={code_version()} prompt_audio={robot.speaker.audio_hash}")
 
+    # [RECORDING] start before anything is said; do not start the round if the microphone fails
+    recorder = None
+    if args.record:
+        recorder = AudioRecorder(log.path, device=args.record_device, folder=Path(args.record_dir))
+        try:
+            recorder.start()
+        except Exception as exc:  # noqa: BLE001
+            robot.close()
+            log.log("recording_failed", detail=str(exc))
+            log.close()
+            raise SystemExit(f"Could not start the recording: {exc}\nFix it before starting the round "
+                             "(macOS: allow microphone access for your terminal), or run without --record.")
+        log.log("recording_start", detail=f"file={recorder.wav_path.name} offset_s={recorder.start_t:.3f}")
+        print(f"Recording to {recorder.wav_path}")
+        if not args.no_pause:
+            input("Have each person say 'I'm in seat 1' (2, 3), then press Enter to start the round ... ")
+            log.log("participants_introduced")
+    elif args.target != "sim":
+        print("NOTE: not recording (add --record to record the room for annotation).")
+
     source = NullSource()
     listener = ParticipationListener.from_config(cfg.seat_azimuths_deg, det)  
     ticklog = TickLog(log.path) if det.log_ticks else None  
@@ -167,6 +201,13 @@ def main() -> None:
     finally:
         robot.close()
         source.close()
+        if recorder is not None:  # [RECORDING] always save the audio, even if the round was aborted
+            recorder.stop()
+            log.log("recording_end", detail=f"seconds={recorder.seconds:.1f} peak={recorder.peak:.2f} "
+                                            f"stream_problems={recorder.problems}")
+            print(f"Audio saved: {recorder.wav_path} ({recorder.seconds / 60:.1f} min)")
+            if recorder.peak < 0.02:
+                print("WARNING: the recording is almost silent - check the microphone before the next round!")
         log.close()
         if ticklog is not None:
             ticklog.close()

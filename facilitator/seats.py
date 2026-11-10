@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 from typing import List, Tuple
 
-PLACEHOLDER_SEAT_AZIMUTHS_DEG: List[float] = [50.0, 0.0, -50.0]  # PLACEHOLDER - calibrate!
+PLACEHOLDER_SEAT_AZIMUTHS_DEG: List[float] = [70.0, 0.0, -70.0]  # PLACEHOLDER - calibrate!
 
 SEATS_FILE = Path(__file__).resolve().parent.parent / "seats.json"
 
