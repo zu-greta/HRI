@@ -1,7 +1,7 @@
 """Record a calibration session on the real robot: ticks + automatic labels.
 
+    python run_calibration.py --target wireless             # our robot (add --host <IP> if needed)
     python run_calibration.py --target lite                 # USB robot
-    python run_calibration.py --target wireless --host reachy-mini.local
     python evaluate_offline.py fit --ticks <printed>_ticks.csv --labels <printed>_labels.csv
 
 What happens (about 6 minutes with the defaults):
@@ -21,7 +21,7 @@ The facing-the-group block gives the seat angles (seats.json); the facing-a-seat
 give the microphone noise model with the head turned, incl. front/back mirroring
 (detection_params.json). Also use the recording to check the conventions:
   * a voice on the robot's LEFT must give world_az_deg > 0 in the tick log;
-  * after the robot turns to a seat at +50 deg, head_yaw_deg must read about +50.
+  * after the robot turns to a seat at +70 deg, head_yaw_deg must read about +70.
 """
 
 import argparse
@@ -90,7 +90,7 @@ def main() -> None:
 
     cfg = Config()
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--target", choices=[t for t in TARGETS if t != "sim"], default="lite")
+    p.add_argument("--target", choices=[t for t in TARGETS if t != "sim"], default="wireless")
     p.add_argument("--host", default=cfg.host)
     p.add_argument("--seconds", type=float, default=20.0, help="speaking time per seat and head position")
     p.add_argument("--name", default="CALIB", help="label for the log files")

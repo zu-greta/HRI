@@ -24,7 +24,7 @@ Everything needed to run the study **alone**, without knowing the code. Do the p
    This creates `.venv` and installs everything. It ends with a check; "no daemon" at this point is fine.
 3. **Microphone permission** (macOS): System Settings → Privacy & Security → **Microphone** → switch **Terminal** on. Restart Terminal.
 4. **Install Reachy Mini Control** (the robot's desktop app) and **Audacity** (free, https://www.audacityteam.org), used for labelling.
-5. **Check the files exist** in `<REPO>`: `run_session.py`, `check_setup.py`, `check_turns.py`, `check_recording.py`, `evaluate_offline.py`, `analyze_study.py`, `audacity_labels_to_csv.py`, `prompts/*.wav`. If any is missing, run `git pull`. If it's still missing, ask the team.
+5. **Check the files exist** in `<REPO>`: `run_session.py`, `run_calibration.py`, `check_setup.py`, `check_turns.py`, `check_recording.py`, `evaluate_offline.py`, `analyze_study.py`, `audacity_labels_to_csv.py`, `prompts/*.wav`. If any is missing, run `git pull`. If it's still missing, ask the team.
 
 **Every time you open a new Terminal window**, start with:
 ```bash
@@ -69,37 +69,35 @@ python check_recording.py
 ```
 Speak from the **furthest chair** during the 5 seconds. It should say **OK**. For a USB microphone, first run `python check_recording.py --list`, then `python check_recording.py --device "USB"`, and add `--record-device "USB"` to every `run_session.py` command below.
 
-### C3. Calibration (~30 min, 3 people needed)
-This measures how the robot hears each chair. **It only needs redoing if the room, the chairs or the robot move.**
-1. Three people sit in seats 1, 2 and 3. Each needs **a text to read aloud** for about 20 seconds (any article).
+### C3. Calibration (~15 min, 3 people needed)
+This measures where the robot hears each chair, and how noisy its microphones are. **It only needs redoing if the room, the chairs or the robot move.** It is not done per group. No Audacity labelling is needed: the script knows who was told to speak when.
+
+1. Three people sit in seats 1, 2 and 3, each with **a text to read aloud** (any article, about 2 minutes' worth). Room quiet: no music or fans; the experimenter stays **silent** (point at people instead of talking).
 2. Run:
    ```bash
-   python run_session.py --target wireless --source robot --record --record-dir ~/study_data/CALIB \
-     --group CALIB --turns 3 --silence 6 --max-listen 120
+   python run_calibration.py --target wireless
    ```
-3. When it asks, each person says "I'm in seat 1" (2, 3); then press **Enter**.
-4. The robot says hello and asks a question **to everyone, while facing the middle**. Right after the question: **seat 1 reads for ~20 s, then seat 2, then seat 3**, one straight after the other, with no long pauses.
-5. Then just chat normally for the rest of the round (the robot asks 3 more questions). Wait for "Done".
-6. **Label it in Audacity** (~15 min):
-   - Open `~/study_data/CALIB/CALIB_R1_T1_baseline_<time>_audio.wav`.
-   - For **every stretch of speech**: select it with the mouse, press **Cmd+B**, type the seat number (**1**, **2** or **3**), press Enter. Use the "I'm in seat …" introductions to recognise the voices. Don't label the robot's voice.
-   - At minimum, label the three readings exactly. Label as much of the chat as you can.
-   - **File → Export → Export Labels…** → save as `~/study_data/CALIB/CALIB_labels.txt`.
-7. **Convert and fit** (copy the `<time>` part from the file names):
+3. Follow the screen (about 6 minutes). The robot faces the group, then each seat in turn. At each position:
+   - "Everyone **SILENT** for 5 s": nobody talks.
+   - "**SEAT 1: speak now**" (20 s): only seat 1 reads aloud, in a normal voice. Then seat 2, then seat 3.
+   - **If anyone speaks out of turn, or there is a noise, press Ctrl+C and start again.**
+4. At the end it prints two file names (`logs/CALIB_calibration_<time>_ticks.csv` and `..._labels.csv`) and the next command. Run it with `--dry-run` first, which only shows the result:
    ```bash
-   python audacity_labels_to_csv.py ~/study_data/CALIB/CALIB_labels.txt ~/study_data/CALIB/CALIB_labels.csv
-   cat ~/study_data/CALIB/CALIB_R1_T1_baseline_<time>_audio.json      # note the number after "offset_s"
-   python evaluate_offline.py fit --ticks logs/CALIB_R1_T1_baseline_<time>_ticks.csv \
-     --labels ~/study_data/CALIB/CALIB_labels.csv --offset <offset_s>
+   python evaluate_offline.py fit --ticks logs/CALIB_calibration_<time>_ticks.csv \
+     --labels logs/CALIB_calibration_<time>_labels.csv --dry-run
    ```
-   It prints the seat angles and writes `seats.json` and `detection_params.json` into `<REPO>`.
-8. **Save the calibration:**
+   **Check the numbers:**
+   - **Seats:** about **+70, 0, −70** (within ~15°). The **first must be positive** (seat 1 = robot's left) and the last negative. If the signs are reversed or a seat is far off, check the chairs and run the calibration again.
+   - **Microphone model:** `angle_sigma_deg` roughly 5–25; `vad_false_alarm_rate` below about 0.15. A high false-alarm rate means the room was noisy or someone spoke during a silent part, so run it again.
+5. If the numbers look right, run the same command **without `--dry-run`**. This writes `seats.json` and `detection_params.json` into `<REPO>`.
+6. **Save the calibration:**
    ```bash
    git add seats.json detection_params.json
    git commit -m "Calibration for <room name>"
    git push
    ```
-9. Check again with `python check_turns.py --target wireless`: the robot should still face each chair.
+   Keep the two `CALIB_calibration_*` files too: copy them to `~/study_data/CALIB/`.
+7. Check with `python check_turns.py --target wireless`: the robot should face each chair. `run_session.py` no longer prints the "PLACEHOLDER seat angles" warning.
 
 ### C4. Test round and pilot
 1. A test round with 3 colleagues:
