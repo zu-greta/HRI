@@ -102,7 +102,7 @@ This measures where the robot hears each chair, and how noisy its microphones ar
 ### C4. Test round and pilot
 1. A test round with 3 colleagues:
    ```bash
-   caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/TEST \
+   caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir /Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/ \
      --group TEST --round 1 --topic 1 --condition adaptive --quiet-seat 3
    ```
    **Check:**
