@@ -1,41 +1,35 @@
 # Session protocol: participation-balancing study (Reachy Mini Wireless)
 
-Everything needed to run the study **alone**, without knowing the code. Do the parts in order. Commands are typed in the **Terminal** app on the laptop.
+Session step by step guide.
 
-- One group = 3 participants and two rounds of about 8 minutes: **random** and **balancing**, in the order given by the schedule. Allow **about 45 minutes per group**.
+- One group = 3 participants and two rounds of about 8 minutes (NOTE: rounds are not necessarily 8min so we should note it down in the report!): **random** and **balancing**, in the order given by the schedule. Allow **about 20 minutes per group**.
 - In the commands: *random* = `--condition baseline`, *balancing* = `--condition adaptive`.
-
-**Conventions used below**
-- `<REPO>` = the project folder (the cloned GitHub repository), e.g. `~/Documents/HRI`.
-- All study data goes to **`~/study_data/`** on the laptop, one folder per group. It is never put in the repo or on GitHub.
-- If `reachy-mini.local` doesn't work, add **`--host <ROBOT_IP>`** to **every** command that has `--target wireless`. The IP is shown in Reachy Mini Control.
 
 ---
 
-## A. First-time setup on a new laptop (once, ~20 min)
+## A. first-time setup
 
 1. **Python 3.12.** On a Mac, open Terminal and run `brew install python@3.12` (install Homebrew from https://brew.sh first if needed).
 2. **Get the code and install it:**
    ```bash
-   git clone https://github.com/<owner>/<repo>.git ~/Documents/HRI
+   git clone https://github.com/zu-greta/HRI.git ~/Documents/HRI
    cd ~/Documents/HRI
    bash setup.sh
    ```
    This creates `.venv` and installs everything. It ends with a check; "no daemon" at this point is fine.
 3. **Microphone permission** (macOS): System Settings → Privacy & Security → **Microphone** → switch **Terminal** on. Restart Terminal.
 4. **Install Reachy Mini Control** (the robot's desktop app) and **Audacity** (free, https://www.audacityteam.org), used for labelling.
-5. **Check the files exist** in `<REPO>`: `run_session.py`, `run_calibration.py`, `check_setup.py`, `check_turns.py`, `check_recording.py`, `evaluate_offline.py`, `analyze_study.py`, `audacity_labels_to_csv.py`, `prompts/*.wav`. If any is missing, run `git pull`. If it's still missing, ask the team.
+5. run `git pull` to make sure you are up to date
 
-**Every time you open a new Terminal window**, start with:
+Every time, start with:
 ```bash
 cd ~/Documents/HRI
 source .venv/bin/activate
 ```
-The line should now start with `(.venv)`.
 
 ---
 
-## B. Connecting the robot (every time)
+## B. connecting the robot (every time)
 
 1. Switch the robot on (plug in the charger if the battery is low).
 2. Turn on the **phone hotspot**, and connect **both the robot and the laptop** to it. Don't use university Wi-Fi: it blocks the connection.
@@ -51,28 +45,21 @@ The line should now start with `(.venv)`.
 
 ---
 
-## C. Once, before the first group
+## C. calibration
 
-### C1. Room layout (~10 min)
+### C1. room layout (~10 min)
 1. Put the robot on the table, facing the middle chair. **Mark its position and facing direction with tape.**
-2. Put three chairs about 1 m from the robot: **seat 1 on the robot's left (+70°)**, **seat 2 straight ahead**, **seat 3 on the robot's right (−70°)**. Mark each chair with tape. ("Left" means the robot's own left, i.e. your right when you face the robot.)
+2. Put three chairs about 1 m from the robot: **seat 1 on the robot's left (+70°)**, **seat 2 straight ahead**, **seat 3 on the robot's right (−70°)**. Mark each chair with tape. While facing the robot, Seat 1 is the rightmost chair, Seat 2 is the middle, and Seat 3 is the leftmost.
 3. Check that the robot faces each chair:
    ```bash
    python check_turns.py --target wireless
    ```
    Watch the robot: its face should point at seat 1, then seat 3, then back to the middle. If not, adjust the chairs (not the robot), re-mark them, and run it again.
 
-### C2. Test the recording (~5 min)
-Put the laptop where it can hear all three chairs (or plug in a USB microphone).
-```bash
-python check_recording.py
-```
-Speak from the **furthest chair** during the 5 seconds. It should say **OK**. For a USB microphone, first run `python check_recording.py --list`, then `python check_recording.py --device "USB"`, and add `--record-device "USB"` to every `run_session.py` command below.
+### C2. calibration (~15 min, 3 people needed)
+Calibrate once before the first group, don't move the chairs afterwards.
 
-### C3. Calibration (~15 min, 3 people needed)
-This measures where the robot hears each chair, and how noisy its microphones are. **It only needs redoing if the room, the chairs or the robot move.** It is not done per group. No Audacity labelling is needed: the script knows who was told to speak when.
-
-1. Three people sit in seats 1, 2 and 3, each with **a text to read aloud** (any article, about 2 minutes' worth). Room quiet: no music or fans; the experimenter stays **silent** (point at people instead of talking).
+1. Three people sit in seats 1, 2 and 3.
 2. Run:
    ```bash
    python run_calibration.py --target wireless
@@ -90,12 +77,7 @@ This measures where the robot hears each chair, and how noisy its microphones ar
    - **Seats:** about **+70, 0, −70** (within ~15°). The **first must be positive** (seat 1 = robot's left) and the last negative. If the signs are reversed or a seat is far off, check the chairs and run the calibration again.
    - **Microphone model:** `angle_sigma_deg` roughly 5–25; `vad_false_alarm_rate` below about 0.15. A high false-alarm rate means the room was noisy or someone spoke during a silent part, so run it again.
 5. If the numbers look right, run the same command **without `--dry-run`**. This writes `seats.json` and `detection_params.json` into `<REPO>`.
-6. **Save the calibration:**
-   ```bash
-   git add seats.json detection_params.json
-   git commit -m "Calibration for <room name>"
-   git push
-   ```
+6. **Save the calibration:** push the `seats.json detection_params.json` files to GitHub
    Keep the two `CALIB_calibration_*` files too: copy them to `~/study_data/CALIB/`.
 7. Check with `python check_turns.py --target wireless`: the robot should face each chair. `run_session.py` no longer prints the "PLACEHOLDER seat angles" warning.
 
@@ -105,13 +87,7 @@ This measures where the robot hears each chair, and how noisy its microphones ar
    caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir /Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/ \
      --group TEST --round 1 --topic 1 --condition adaptive --quiet-seat 3
    ```
-   **Check:**
-   - There is **no** "PLACEHOLDER seat angles" warning at the start (it means calibration is missing).
-   - The robot waits until people stop talking, turns to someone, and speaks through its own speaker.
-   - At the end, an `_audio.wav` is in `~/study_data/TEST`.
-2. Pilot with 1–2 real groups using sections D–F (as groups `P01`, `P02`). Fix any problems with the team.
-3. **Freeze everything** (the team does this once): `git tag v1.0-study && git push --tags`. After this, **don't change code, settings, seats or prompts** until the study is finished.
-4. Prepare: consent forms (including **audio recording**), pre-questionnaire, post-round questionnaire (the same one after each round), debrief text, and a notes sheet per group.
+2. Prepare: consent forms (including **audio recording**), pre-questionnaire, post-round questionnaire (the same one after each round), debrief text, and a notes sheet per group.
 
 ### Schedule (which round is which)
 
@@ -142,9 +118,9 @@ G01–G04 are order A (random first); G05–G07 are order B (balancing first).
 
 ## E. Running a group
 
-### E1. Participants arrive (~10 min)
+### E1. Participants arrive 
 1. Consent form, then the pre-questionnaire. Give IDs `G01-P1`, `G01-P2`, `G01-P3`.
-2. Ask who usually is the **quiet one** in groups (this comes from the pre-questionnaire). Seat **that person in the seat the schedule gives**, and the others in the remaining seats. On the notes sheet, write: seat 1 = …, seat 2 = …, seat 3 = … (participant IDs).
+2. Place quiet person in the seat the schedule gives. On the notes sheet, write: seat 1 = …, seat 2 = …, seat 3 = … (participant IDs).
 3. Read out the **same instructions for every group**, and **don't mention conditions, "balancing" or "random"**:
    > "The robot will lead two short discussions of about 8 minutes each. It will ask questions, sometimes to a specific person. Please talk naturally with each other and with the robot. There are no right or wrong answers. After each discussion there's a short questionnaire."
 
@@ -158,24 +134,23 @@ G01–G04 are order A (random first); G05–G07 are order B (balancing first).
 1. The post-round questionnaire (participants use their IDs).
 2. Copy the round's logs into the group folder (use the group's number):
    ```bash
-   cp logs/G01_R1_* ~/study_data/G01/
+   cp logs/G01_R1_* Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G01_R1/
    ```
 3. Notes: the start time, anything unusual. **Don't move anything or change any settings.**
 
 ### E4. Round 2 (~8 min)
 The same as E2, with the group's **round 2 command**. Afterwards:
 ```bash
-cp logs/G01_R2_* ~/study_data/G01/
+cp logs/G01_R2_* Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G01_R2/
 ```
 
 ### E5. End (~5 min)
 1. The post-round questionnaire again, plus: *"Did you notice any difference between the two discussions? If so, what?"*
 2. **Debrief:** explain that the robot either chose people at random, or chose whoever it heard least. Answer questions and thank them.
 3. **Check the folder.** `ls ~/study_data/G01` should show, for **both** rounds: `….csv`, `…_ticks.csv`, `…_audio.wav`, `…_audio.json`. Save the notes sheet there as `notes.txt`.
-4. **Back it up** to the agreed secure storage (university drive), and **never** to GitHub.
+4. **Back it up** to the agreed secure storage, and **never** to GitHub.
 
 ### E6. The next group
-Put the chairs back on their marks; do section D again (it's quick the second time); then E1 with the next group.
 
 ---
 
@@ -224,38 +199,38 @@ Each command is one line, or continues on the next line after the `\`. Add `--ho
 
 **G01** (quiet person: seat 1)
 ```bash
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G01 --group G01 --order A --round 1 --topic 1 --condition baseline --quiet-seat 1
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G01 --group G01 --order A --round 2 --topic 2 --condition adaptive --quiet-seat 1
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G01 --group G01 --order A --round 1 --topic 1 --condition baseline --quiet-seat 1
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G01 --group G01 --order A --round 2 --topic 2 --condition adaptive --quiet-seat 1
 ```
 **G02** (quiet person: seat 2)
 ```bash
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G02 --group G02 --order A --round 1 --topic 2 --condition baseline --quiet-seat 2
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G02 --group G02 --order A --round 2 --topic 1 --condition adaptive --quiet-seat 2
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G02 --group G02 --order A --round 1 --topic 2 --condition baseline --quiet-seat 2
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G02 --group G02 --order A --round 2 --topic 1 --condition adaptive --quiet-seat 2
 ```
 **G03** (quiet person: seat 3)
 ```bash
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G03 --group G03 --order A --round 1 --topic 1 --condition baseline --quiet-seat 3
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G03 --group G03 --order A --round 2 --topic 2 --condition adaptive --quiet-seat 3
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G03 --group G03 --order A --round 1 --topic 1 --condition baseline --quiet-seat 3
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G03 --group G03 --order A --round 2 --topic 2 --condition adaptive --quiet-seat 3
 ```
 **G04** (quiet person: seat 1)
 ```bash
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G04 --group G04 --order A --round 1 --topic 2 --condition baseline --quiet-seat 1
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G04 --group G04 --order A --round 2 --topic 1 --condition adaptive --quiet-seat 1
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G04 --group G04 --order A --round 1 --topic 2 --condition baseline --quiet-seat 1
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G04 --group G04 --order A --round 2 --topic 1 --condition adaptive --quiet-seat 1
 ```
 **G05** (quiet person: seat 2)
 ```bash
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G05 --group G05 --order B --round 1 --topic 1 --condition adaptive --quiet-seat 2
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G05 --group G05 --order B --round 2 --topic 2 --condition baseline --quiet-seat 2
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G05 --group G05 --order B --round 1 --topic 1 --condition adaptive --quiet-seat 2
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G05 --group G05 --order B --round 2 --topic 2 --condition baseline --quiet-seat 2
 ```
 **G06** (quiet person: seat 3)
 ```bash
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G06 --group G06 --order B --round 1 --topic 2 --condition adaptive --quiet-seat 3
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G06 --group G06 --order B --round 2 --topic 1 --condition baseline --quiet-seat 3
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G06 --group G06 --order B --round 1 --topic 2 --condition adaptive --quiet-seat 3
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G06 --group G06 --order B --round 2 --topic 1 --condition baseline --quiet-seat 3
 ```
 **G07** (quiet person: seat 1)
 ```bash
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G07 --group G07 --order B --round 1 --topic 1 --condition adaptive --quiet-seat 1
-caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir ~/study_data/G07 --group G07 --order B --round 2 --topic 2 --condition baseline --quiet-seat 1
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G07 --group G07 --order B --round 1 --topic 1 --condition adaptive --quiet-seat 1
+caffeinate -dis python run_session.py --target wireless --source robot --record --record-dir Users/gretazu/Documents/ICL_fall/70101_hri/cw/gp1/HRI/logs/analysis_data/G07 --group G07 --order B --round 2 --topic 2 --condition baseline --quiet-seat 1
 ```
 
 ---

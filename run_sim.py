@@ -17,7 +17,7 @@ from facilitator.robot_io import _ensure_gi
 
 _ensure_gi()  # must run before the SDK is imported
 
-from reachy_mini.daemon.app.main import main  # noqa: E402
+from reachy_mini.daemon.app.main import main  
 
 args = sys.argv[1:]
 if "--full" in args:
