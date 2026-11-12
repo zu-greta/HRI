@@ -24,6 +24,21 @@ def test_say_blocks_for_clip_length_and_flags_speaking(tmp_path):
     assert sp.is_speaking()  # echo margin still running
 
 
+def test_start_returns_immediately_and_wait_blocks(tmp_path):
+    import time
+
+    make_prompts(tmp_path, seconds=0.3)
+    sp = Speaker("silent", prompts_dir=tmp_path)
+    sp.prepare()
+    t0 = time.monotonic()
+    assert sp.start("hello") == pytest.approx(0.3)
+    assert time.monotonic() - t0 < 0.1  # robot can move while the prompt plays
+    assert sp.is_speaking()
+    sp.wait()
+    assert time.monotonic() - t0 >= 0.29
+    assert sp.is_speaking()  # echo margin still running
+
+
 def test_missing_wav_is_reported(tmp_path):
     (tmp_path / "script.json").write_text(json.dumps({"bye": "Bye"}))
     with pytest.raises(FileNotFoundError):

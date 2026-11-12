@@ -49,7 +49,14 @@ class Config:
 
     # --- Robot motion ----------------------------------------------------------
     move_duration_s: float = 0.8
-    body_share: float = 0.6           # part of the turn done by the body (rest by the head)
+    body_share: float = 1.0           # part of the turn done by the body (rest by the head). 1.0 = the body
+                                      # does the whole turn: on the lab robot (12 Nov 2026) the head added only
+                                      # ~3 deg on top of the body, so 0.6 stopped ~20 deg short of seats 1 and 3
+    # Talking gestures (facilitator/animation.py): head sway + antenna motion + the daemon's
+    # audio-driven head wobble, ONLY while the robot speaks; identical in both conditions.
+    # Freeze these with the rest of the study settings (they are logged per round).
+    animate: bool = True
+    gesture_scale: float = 1.0        # 0 = still, 1 = default amplitudes, >1 livelier
 
     # --- Baseline policy --------------------------------------------------------
     # "balanced" (STUDY DEFAULT): random order, but everyone addressed equally often (2 of 6 each).

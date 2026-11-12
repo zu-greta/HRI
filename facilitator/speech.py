@@ -24,6 +24,7 @@ import json
 import platform
 import shutil
 import subprocess
+import threading
 import time
 import wave
 from pathlib import Path
@@ -48,6 +49,8 @@ class Speaker:
         self.durations: Dict[str, float] = {}
         self.audio_hash = ""  # fingerprint of all prompt audio, logged so every round provably used the same files
         self._speaking_until = 0.0
+        self._ends_at = 0.0          # end of the current prompt's playback (monotonic)
+        self._player = None          # laptop playback thread, if any
         self._http = requests.Session()
 
     # ------------------------------------------------------------------ setup
@@ -81,22 +84,42 @@ class Speaker:
     # ----------------------------------------------------------------- speech
     def say(self, prompt_id: str) -> float:
         """Play one prompt and wait until it has finished. Returns its duration (s)."""
+        duration = self.start(prompt_id)
+        self.wait()
+        return duration
+
+    def start(self, prompt_id: str) -> float:
+        """Start playing one prompt WITHOUT waiting (the robot animates meanwhile); then call wait().
+
+        Returns the prompt's duration (s). is_speaking() is True from now until the end
+        of the prompt + ECHO_MARGIN_S, exactly as with say().
+        """
         if prompt_id not in self.texts:
             raise KeyError(f"unknown prompt {prompt_id!r}; add it to prompts/script.json")
         duration = self.durations.get(prompt_id, 0.0)
         print(f'   [robot says] "{self.texts[prompt_id]}"')
-        self._speaking_until = time.monotonic() + duration + ECHO_MARGIN_S
+        now = time.monotonic()
+        self._speaking_until = now + duration + ECHO_MARGIN_S
+        self._ends_at = now + duration
 
         if self.output == "robot":
             r = self._http.post(f"{self.base_url}/api/media/play_sound",
                                 json={"file": f"{prompt_id}.wav"}, timeout=5)
             r.raise_for_status()
-            time.sleep(duration)
         elif self.output == "laptop":
-            _play_locally(self.dir / f"{prompt_id}.wav", duration)
-        else:
-            time.sleep(duration)
+            self._player = threading.Thread(target=_play_locally, args=(self.dir / f"{prompt_id}.wav", duration),
+                                            daemon=True)
+            self._player.start()
         return duration
+
+    def wait(self) -> None:
+        """Block until the prompt started with start() has finished playing."""
+        remaining = self._ends_at - time.monotonic()
+        if remaining > 0:
+            time.sleep(remaining)
+        if self._player is not None:
+            self._player.join()
+            self._player = None
 
     def is_speaking(self) -> bool:
         return time.monotonic() < self._speaking_until

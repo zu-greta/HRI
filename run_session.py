@@ -133,6 +133,8 @@ def main() -> None:
     p.add_argument("--record-device", help="microphone to record with (name or part of it; see check_recording.py --list)")
     p.add_argument("--record-dir", default=".",
                    help="folder for the recordings (default: the folder you run this command from)")
+    p.add_argument("--no-animate", action="store_true",
+                   help="keep head and antennas still while the robot speaks (default: talking gestures on)")
     p.add_argument("--no-pause", action="store_true",
                    help="with --record: start the round immediately (no 'press Enter' for the seat introductions)")
     args = p.parse_args()
@@ -153,7 +155,10 @@ def main() -> None:
     det.estimator = args.estimator or det.estimator
     policy = make_policy(args.condition, len(cfg.seat_azimuths_deg), cfg.shuffle_each_round, cfg.seed, det,
                          baseline=cfg.baseline)
-    robot = Robot(args.target, cfg.host, cfg.move_duration_s, cfg.body_share)
+    if args.no_animate:
+        cfg.animate = False
+    robot = Robot(args.target, cfg.host, cfg.move_duration_s, cfg.body_share,
+                  animate=cfg.animate, gesture_scale=cfg.gesture_scale)
     output = args.speech if args.speech != "auto" else ("laptop" if args.target == "sim" else "robot")
     # real robot: never synthesise missing prompts on the fly (the voice is a controlled variable)
     robot.speaker = Speaker(output, robot.base_url, auto_generate=(args.target == "sim"))
@@ -167,11 +172,15 @@ def main() -> None:
     robot.speaker.prepare()  # checks prompts/*.wav exist (and uploads them to a real robot)
     print(f"Voice output: {output}")
     log.log("versions", detail=f"code={code_version()} prompt_audio={robot.speaker.audio_hash}")
+    log.log("animation", detail=f"animate={robot.animate} gesture_scale={robot.gesture_scale} "
+                                f"wobbling={robot.wobbling}")
+    print(f"Talking gestures: {'on' if robot.animate else 'off'}"
+          + (" (+ head wobble)" if robot.wobbling else ""))
 
     # [RECORDING] start before anything is said; do not start the round if the microphone fails
     recorder = None
     if args.record:
-        recorder = AudioRecorder(log.path, device=args.record_device, folder=Path(args.record_dir))
+        recorder = AudioRecorder(log.path, device=args.record_device, folder=Path(args.record_dir).expanduser())
         try:
             recorder.start()
         except Exception as exc:  # noqa: BLE001

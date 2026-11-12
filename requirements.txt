@@ -11,4 +11,8 @@ numpy>=2.2.5                  # same minimum as reachy-mini 1.13.0
 pytest>=8.0                   # unit tests
 sounddevice>=0.4.6               # laptop microphone: LaptopMicSource and --record recording - [RECORDING]
 scipy>=1.11                   # statistics in analyze_study.py (Wilcoxon) - [STUDY ALIGNMENT]
+# Optional, only to (re)generate the prompt wavs with make_prompts.py (study voice: Piper en_US-lessac-medium).
+# Not needed to run sessions - they play the committed prompts/*.wav:
+#   pip install piper-tts
+#   python -m piper.download_voices --download-dir voices en_US-lessac-medium
 pyttsx3>=2.90; sys_platform == "win32"   # text-to-speech for make_prompts.py on Windows (macOS uses `say`)

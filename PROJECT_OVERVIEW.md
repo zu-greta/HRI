@@ -184,7 +184,8 @@ These are a sanity check, not evidence: the group model is simple.
 | `facilitator/config.py` | Timings, prompts per topic, motion, baseline type, seed | CORE |
 | `facilitator/robot_io.py` | Reachy Mini SDK: connect, `turn_to`, `face_group`, `say`, `is_speaking`, `head_yaw_deg` | CORE |
 | `facilitator/speech.py` | Plays `prompts/<id>.wav` on the robot or laptop; echo margin; audio fingerprint; no auto-TTS on real robot | CORE |
-| `facilitator/tts.py` | Text → wav (macOS `say`, Windows pyttsx3, Linux espeak-ng); used by `make_prompts.py` | CORE (prompt prep) |
+| `facilitator/tts.py` | Text → wav: Piper neural voice (study), or macOS `say` / Windows pyttsx3 / Linux espeak-ng; used by `make_prompts.py` | CORE (prompt prep) |
+| `facilitator/animation.py` | Talking gestures (head sway, antennas) while the robot speaks; same in both conditions; `--no-animate` turns off | CORE |
 | `make_prompts.py`, `prompts/script.json` | Prompt texts → wavs + `manifest.json` (wavs must be committed) | CORE |
 | `facilitator/logger.py` | Event CSV incl. `mono_s` (same clock as ticks) | CORE |
 | `facilitator/ticklog.py` | Per-tick CSV with raw readings → offline replay | CORE + EVAL |
@@ -258,7 +259,7 @@ python sim_scenario.py                       # simulator running in another term
 python sim_scenario.py --no-robot            # real time with voices, no simulator
 
 # prompts: once, on one computer, one voice; then commit prompts/*.wav + manifest.json
-python make_prompts.py --voice Samantha
+python make_prompts.py                       # Piper en_US-lessac-medium (pip install piper-tts + download, see requirements.txt)
 
 # simulator sessions
 python run_session.py --condition adaptive --source scripted    # simulated mic array
