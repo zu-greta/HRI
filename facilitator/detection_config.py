@@ -4,8 +4,6 @@ Defaults here; detection_params.json (written by `evaluate_offline.py fit` and b
 after `evaluate_offline.py tune`) overrides them. The four microphone-model values are
 PLACEHOLDERS until fitted on a calibration recording from the real robot.
 
-[GRETA] replace the placeholders with the fitted values 
-
 Freeze detection_params.json before the first participant group (report: "fixed after offline tuning").
 """
 

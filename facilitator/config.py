@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
-from .seats import PLACEHOLDER_SEAT_AZIMUTHS_DEG  # placeholder seats live in seats.py
+from .seats import PLACEHOLDER_SEAT_AZIMUTHS_DEG  # seats live in seats.py
 
 
 @dataclass

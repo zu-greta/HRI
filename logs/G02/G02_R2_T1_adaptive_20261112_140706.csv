@@ -1,0 +1,15 @@
+time_iso,t_s,mono_s,group,condition,event,seat,detail
+2026-11-12T14:07:06.029,0.000,1760408.435,G02_R2_T1,adaptive,study_info,,group=G02 round=2 topic=1 order=A condition=adaptive quiet_seat=2 baseline=balanced seed=676571198
+2026-11-12T14:07:09.000,2.972,1760411.407,G02_R2_T1,adaptive,versions,,code=4cd489e-dirty prompt_audio=be15c1082c
+2026-11-12T14:07:09.001,2.972,1760411.407,G02_R2_T1,adaptive,animation,,animate=True gesture_scale=1.0 wobbling=True
+2026-11-12T14:07:09.276,3.247,1760411.682,G02_R2_T1,adaptive,recording_start,,file=G02_R2_T1_adaptive_20261112_140706_audio.wav offset_s=1760411.648
+2026-11-12T14:07:13.987,7.958,1760416.393,G02_R2_T1,adaptive,participants_introduced,,
+2026-11-12T14:07:13.993,7.964,1760416.399,G02_R2_T1,adaptive,detection_setup,,"attributor=hmm estimator=turns_decay seats=[55.5, -3.1, -57.5] placeholder_seats=False"
+2026-11-12T14:07:14.071,8.042,1760416.477,G02_R2_T1,adaptive,session_start,,policy=adaptive_least_active target=wireless topic=1 questions=6
+2026-11-12T14:07:14.892,8.864,1760417.298,G02_R2_T1,adaptive,robot_say_start,,intro
+2026-11-12T14:07:21.115,15.087,1760423.590,G02_R2_T1,adaptive,robot_say_end,,intro
+2026-11-12T14:07:21.118,15.090,1760423.592,G02_R2_T1,adaptive,robot_say_start,,t1_open
+2026-11-12T14:07:26.121,20.094,1760428.597,G02_R2_T1,adaptive,robot_say_end,,t1_open
+2026-11-12T14:07:26.355,20.326,1760428.828,G02_R2_T1,adaptive,listen_start,,
+2026-11-12T14:08:10.919,64.892,1760473.394,G02_R2_T1,adaptive,listen_end,,reason=silence waited_s=43.6 speech_s=25.3
+2026-11-12T14:08:10.922,64.894,1760473.396,G02_R2_T1,adaptive,decision,1,"activity=[1.28, 18.04, 6.54]"

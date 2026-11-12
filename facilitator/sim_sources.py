@@ -1,7 +1,5 @@
 """Simulated microphones + replay of recordings + ground-truth labels.
 
-[GRETA] - placeholder values until calibrated on the real robot
-
 SIMULATION
 MicModel        - imitates the robot's microphone array: angle noise, outliers,
                   missed speech, false alarms, the array turning with the head,

@@ -1,0 +1,12 @@
+{
+  "wav": "G02_R1_T2_baseline_20261112_134918_audio.wav",
+  "offset_s": 1759344.291,
+  "offset_note": "tick-log time = offset_s + time in the WAV (use as 'offset' in study_sessions.csv)",
+  "started": "2026-11-12T13:49:44",
+  "sample_rate": 16000,
+  "device": "default input",
+  "seconds": 22.8,
+  "peak_level": 0.185,
+  "stream_problems": 0,
+  "finished": true
+}

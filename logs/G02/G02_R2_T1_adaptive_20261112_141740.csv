@@ -1,0 +1,23 @@
+time_iso,t_s,mono_s,group,condition,event,seat,detail
+2026-11-12T14:17:40.429,0.000,1761042.905,G02_R2_T1,adaptive,study_info,,group=G02 round=2 topic=1 order=A condition=adaptive quiet_seat=2 baseline=balanced seed=676571198
+2026-11-12T14:17:46.450,6.021,1761048.928,G02_R2_T1,adaptive,versions,,code=4cd489e-dirty prompt_audio=be15c1082c
+2026-11-12T14:17:46.452,6.023,1761048.928,G02_R2_T1,adaptive,animation,,animate=True gesture_scale=1.0 wobbling=True
+2026-11-12T14:17:46.742,6.313,1761049.219,G02_R2_T1,adaptive,recording_start,,file=G02_R2_T1_adaptive_20261112_141740_audio.wav offset_s=1761049.185
+2026-11-12T14:17:51.221,10.793,1761053.698,G02_R2_T1,adaptive,participants_introduced,,
+2026-11-12T14:17:51.224,10.794,1761053.700,G02_R2_T1,adaptive,detection_setup,,"attributor=hmm estimator=turns_decay seats=[55.5, -3.1, -57.5] placeholder_seats=False"
+2026-11-12T14:17:51.763,11.334,1761054.239,G02_R2_T1,adaptive,session_start,,policy=adaptive_least_active target=wireless topic=1 questions=6
+2026-11-12T14:17:52.681,12.252,1761055.157,G02_R2_T1,adaptive,robot_say_start,,intro
+2026-11-12T14:18:00.162,19.733,1761062.638,G02_R2_T1,adaptive,robot_say_end,,intro
+2026-11-12T14:18:00.163,19.734,1761062.639,G02_R2_T1,adaptive,robot_say_start,,t1_open
+2026-11-12T14:18:06.315,25.886,1761068.792,G02_R2_T1,adaptive,robot_say_end,,t1_open
+2026-11-12T14:18:06.316,25.887,1761068.793,G02_R2_T1,adaptive,listen_start,,
+2026-11-12T14:19:01.741,81.313,1761124.219,G02_R2_T1,adaptive,listen_end,,reason=silence waited_s=55.4 speech_s=32.8
+2026-11-12T14:19:01.744,81.315,1761124.221,G02_R2_T1,adaptive,decision,2,"activity=[19.41, 8.03, 8.45]"
+2026-11-12T14:19:02.579,82.150,1761125.056,G02_R2_T1,adaptive,robot_turn,2,
+2026-11-12T14:19:02.580,82.150,1761125.056,G02_R2_T1,adaptive,robot_say_start,2,addr_2
+2026-11-12T14:19:05.137,84.708,1761127.614,G02_R2_T1,adaptive,robot_say_end,2,addr_2
+2026-11-12T14:19:05.137,84.708,1761127.614,G02_R2_T1,adaptive,robot_say_start,2,t1_q1
+2026-11-12T14:19:08.736,88.307,1761131.212,G02_R2_T1,adaptive,robot_say_end,2,t1_q1
+2026-11-12T14:19:09.378,88.948,1761131.854,G02_R2_T1,adaptive,listen_start,,
+2026-11-12T14:19:17.238,96.809,1761139.714,G02_R2_T1,adaptive,listen_end,,reason=silence waited_s=7.8 speech_s=4.1
+2026-11-12T14:19:17.238,96.809,1761139.715,G02_R2_T1,adaptive,decision,3,"activity=[17.75, 11.9, 7.73]"

@@ -1,0 +1,13 @@
+time_iso,t_s,mono_s,group,condition,event,seat,detail
+2026-11-12T13:49:18.071,0.000,1759340.489,G02_R1_T2,baseline,study_info,,group=G02 round=1 topic=2 order=A condition=baseline quiet_seat=2 baseline=balanced seed=2975529348
+2026-11-12T13:49:21.615,3.544,1759344.033,G02_R1_T2,baseline,versions,,code=4cd489e-dirty prompt_audio=be15c1082c
+2026-11-12T13:49:21.615,3.544,1759344.033,G02_R1_T2,baseline,animation,,animate=True gesture_scale=1.0 wobbling=True
+2026-11-12T13:49:21.908,3.837,1759344.326,G02_R1_T2,baseline,recording_start,,file=G02_R1_T2_baseline_20261112_134918_audio.wav offset_s=1759344.291
+2026-11-12T13:49:30.979,12.909,1759353.397,G02_R1_T2,baseline,participants_introduced,,
+2026-11-12T13:49:30.983,12.912,1759353.400,G02_R1_T2,baseline,detection_setup,,"attributor=hmm estimator=turns_decay seats=[55.5, -3.1, -57.5] placeholder_seats=False"
+2026-11-12T13:49:31.022,12.951,1759353.440,G02_R1_T2,baseline,session_start,,policy=baseline_round_robin target=wireless topic=2 questions=6
+2026-11-12T13:49:31.862,13.792,1759354.280,G02_R1_T2,baseline,robot_say_start,,intro
+2026-11-12T13:49:38.115,20.044,1759360.533,G02_R1_T2,baseline,robot_say_end,,intro
+2026-11-12T13:49:38.115,20.045,1759360.533,G02_R1_T2,baseline,robot_say_start,,t2_open
+2026-11-12T13:49:43.558,25.488,1759365.976,G02_R1_T2,baseline,robot_say_end,,t2_open
+2026-11-12T13:49:44.990,26.919,1759367.408,G02_R1_T2,baseline,recording_end,,seconds=22.8 peak=0.19 stream_problems=0

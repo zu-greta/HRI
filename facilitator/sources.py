@@ -91,10 +91,6 @@ class RobotDoASource(SpeakerSource):
 
 class LaptopMicSource(SpeakerSource):
     """SIMULATOR TESTING: this computer's microphone as a speech on/off detector (no direction).
-
-    Needs the `sounddevice` package. Every reading points straight ahead (pi/2), so all
-    speech is credited to the seat the robot is facing; use --source scripted or keyboard
-    to test the balancing itself.
     """
 
     SAMPLE_RATE = 16000
@@ -179,7 +175,7 @@ class KeyboardSource(SpeakerSource):
 
         try:
             yaw = float(self._head_yaw())
-        except Exception:  # noqa: BLE001 - robot not connected yet
+        except Exception:  # robot not connected yet
             yaw = 0.0
         head_deg = expected_mic_head_deg(self.seat_azimuths_deg[self._seat], yaw)
         return Reading(math.pi / 2 - math.radians(head_deg), now < self._speaking_until)

@@ -12,11 +12,6 @@ every time. is_speaking() stays True for ECHO_MARGIN_S after the sound ends, so 
 session ignores the microphones while the robot hears its own voice and the echo.
 Because say() blocks, the listening loop does NOT run while the robot talks: the tick
 log only contains the echo margin (robot_speaking = 1), not the whole prompt.
-
-STUDY RULE (controlled variable "same voice"): prompts/*.wav are generated ONCE with
-make_prompts.py and committed. auto_generate must be False for real-robot sessions
-(run_session.py does this), so a missing file stops the session instead of being
-silently re-synthesised with a different computer's voice.
 """
 
 import hashlib

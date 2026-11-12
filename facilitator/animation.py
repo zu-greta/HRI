@@ -39,7 +39,7 @@ def prompt_seed(prompt_id: str) -> int:
 
 def _phases(seed: int) -> Tuple[float, float, float, float]:
     """Four phases in [0, 2*pi) derived from the seed, so prompts differ but repeat exactly."""
-    return tuple(((seed >> (8 * k)) & 0xFF) / 256.0 * 2 * math.pi for k in range(4))  # type: ignore[return-value]
+    return tuple(((seed >> (8 * k)) & 0xFF) / 256.0 * 2 * math.pi for k in range(4))  
 
 
 def envelope(t: float, duration: float, ramp_s: float = RAMP_S) -> float:

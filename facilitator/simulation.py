@@ -1,16 +1,6 @@
 """Simulated groups
 
-[GRETA] - placeholder values until calibrated on the real robot
-
 Simulated groups, used to evaluate detection methods before (and besides) the study.
-
-A simulated session follows the real session logic: the robot invites someone, the
-group talks until it goes quiet, the robot decides whom to invite next and turns
-its head there (so the microphones turn too), plays its prompt (its own voice is
-heard by the microphones and must be ignored), and so on.
-
-The group model is deliberately simple and is NOT a claim about real people. It is
-used to compare methods under identical, known conditions with exact ground truth.
 """
 
 import math
@@ -139,8 +129,6 @@ def simulate_session(method: str, seats: Sequence[float], group: GroupModel, mic
     return res
 
 
-# What each compared method uses. "micbot" re-implements Micbot's rule with our
-# hardware (nearest seat per reading, cumulative total, address the minimum).
 METHODS: Dict[str, Dict] = {
     "round_robin": {"condition": "baseline", "det": {"attributor": "hmm", "estimator": "turns_decay"}},
     "micbot": {"condition": "micbot", "det": {"attributor": "nearest", "estimator": "cumulative"}},

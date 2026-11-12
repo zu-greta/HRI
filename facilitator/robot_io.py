@@ -5,7 +5,7 @@ The same code runs on the simulator and the real robot; only --target changes.
 
 import math
 import time
-from typing import Optional
+from typing import Callable, Optional
 
 import requests
 
@@ -17,7 +17,7 @@ TARGETS = ("sim", "lite", "wireless")
 def _ensure_gi() -> None:
     """macOS fix for "No module named 'gi'" (GStreamer bindings) before importing the SDK."""
     try:
-        import gi  # noqa: F401
+        import gi  
     except ImportError:
         try:
             import gstreamer_libs
@@ -28,11 +28,7 @@ def _ensure_gi() -> None:
 
 
 def _ipv4(host: str) -> str:
-    """IPv4 address for a hostname such as reachy-mini.local (the host itself if lookup fails).
-
-    On Windows, reachy-mini.local also resolves to an IPv6 link-local address (fe80::...),
-    which is tried first; the SDK's websocket then hangs until it times out, although plain
-    HTTP to the same name works. Connecting by IPv4 avoids that (and is harmless on macOS).
+    """IPv4 address for a hostname such as reachy-mini.local (the host itself if lookup fails)
     """
     import socket
 
@@ -58,6 +54,10 @@ class Robot:
         # the listening pose the robot returns to after every gesture
         self._yaw_deg = 0.0
         self._antennas_deg = (0.0, 0.0)
+        # recovery settings and reporting
+        self.recover_wait_s, self.reconnect_attempts, self.reconnect_pause_s = 3.0, 10, 2.0
+        self.connection_problems = 0
+        self.on_event: Callable[[str, str], None] = lambda event, detail: None  # e.g. log.log(event, detail=...)
 
     @property
     def base_url(self) -> str:
@@ -85,20 +85,71 @@ class Robot:
             r = requests.post(f"{self.base_url}/api/media/wobbling/{'enable' if on else 'disable'}", timeout=3)
             r.raise_for_status()
             return on
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:  
             if on:
                 print(f"NOTE: could not enable head wobbling ({exc}); antenna/head gestures still run.")
             return False
 
     def close(self) -> None:
-        if self.mini is not None:
+        """[ROBUSTNESS] Never raises: a failed clean-up must not hide the real error or stop saving data."""
+        if self.mini is None:
+            return
+        try:
+            self.face_group()
+        except Exception as exc: 
+            print(f"   (could not turn back to the group while closing: {exc})")
+        if self.wobbling:
+            self.wobbling = self._set_wobbling(False)
+        try:
+            self.mini.__exit__(None, None, None)
+        except Exception:  
+            pass
+        self.mini = None
+
+    # ------------------------------------------------------------- robustness
+    def _send(self, method: str, *args, **kwargs):
+        """Call a ReachyMini method; on a lost connection recover, then retry once."""
+        try:
+            return getattr(self.mini, method)(*args, **kwargs)
+        except ConnectionError as exc:
+            self.connection_problems += 1
+            self.on_event("connection_lost", f"{method}: {exc}")
+            print(f"   [connection lost: {exc} - trying to recover]")
+            self._recover()
+            return getattr(self.mini, method)(*args, **kwargs)
+
+    def _stream_alive(self) -> bool:
+        try:
+            return bool(self.mini.client.is_connected())  # waits up to ~1 s for data from the robot
+        except Exception: 
+            return False
+
+    def _recover(self) -> None:
+        # 1) short Wi-Fi gap: the data stream usually resumes by itself
+        end = time.monotonic() + self.recover_wait_s
+        while time.monotonic() < end:
+            if self._stream_alive():
+                time.sleep(1.1)  # let the SDK's own 1 s liveness check see the data again
+                self.on_event("connection_recovered", "stream resumed")
+                print("   [connection recovered]")
+                return
+            time.sleep(0.2)
+        # 2) the connection really closed: open a new one
+        for attempt in range(1, self.reconnect_attempts + 1):
             try:
-                self.face_group()
-            finally:
-                if self.wobbling:
-                    self.wobbling = self._set_wobbling(False)
-                self.mini.__exit__(None, None, None)
-                self.mini = None
+                try:
+                    self.mini.__exit__(None, None, None)
+                except Exception: 
+                    pass
+                self.connect()
+                self.on_event("connection_recovered", f"reconnected (attempt {attempt})")
+                print(f"   [reconnected after {attempt} attempt(s)]")
+                return
+            except Exception as exc: 
+                print(f"   [reconnect attempt {attempt}/{self.reconnect_attempts} failed: {exc}]")
+                time.sleep(self.reconnect_pause_s)
+        self.on_event("connection_failed", "gave up")
+        raise ConnectionError(f"Lost the robot and could not reconnect to {self.base_url}.")
 
     # ------------------------------------------------------------- actions
     def turn_to(self, azimuth_deg: float, antennas_deg=(0.0, 0.0)) -> None:
@@ -112,7 +163,8 @@ class Robot:
         """
         from reachy_mini.utils import create_head_pose
 
-        self.mini.goto_target(
+        self._send(  # in case of fail
+            "goto_target",
             head=create_head_pose(yaw=azimuth_deg, degrees=True),
             antennas=[math.radians(a) for a in antennas_deg],
             body_yaw=math.radians(azimuth_deg * self.body_share),
@@ -145,7 +197,7 @@ class Robot:
                     antennas=[math.radians(base_r + a_r), math.radians(base_l + a_l)],
                 )
                 time.sleep(period)
-        except Exception as exc:  # noqa: BLE001  a gesture must never stop the session
+        except Exception as exc:  # a gesture must never stop the session
             print(f"   (gesture skipped: {exc})")
         finally:
             self.speaker.wait()
@@ -157,13 +209,14 @@ class Robot:
         from reachy_mini.utils import create_head_pose
 
         try:
-            self.mini.goto_target(
+            self._send(  # recovers the link before the next turn
+                "goto_target",
                 head=create_head_pose(yaw=self._yaw_deg, degrees=True),
                 antennas=[math.radians(a) for a in self._antennas_deg],
                 body_yaw=math.radians(self._yaw_deg * self.body_share),
                 duration=0.25,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:  
             print(f"   (could not settle after gesture: {exc})")
 
     def is_speaking(self) -> bool:
@@ -173,7 +226,6 @@ class Robot:
         """Current head yaw in the room frame, degrees, + = robot's left.
 
         Used every tick to turn the head-relative microphone angle into a room direction.
-        VERIFY ON THE REAL ROBOT: after turn_to(+50) this must read about +50.
         """
         pose = self.mini.get_current_head_pose()
         return math.degrees(math.atan2(pose[1, 0], pose[0, 0]))

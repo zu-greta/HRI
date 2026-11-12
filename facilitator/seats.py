@@ -1,11 +1,11 @@
 """participant seating from robot POV
 
-[GRETA] PLACEHOLDER until calibrated. run_session.py replaces this with seats.json when it exists.
+[GRETA] PLACEHOLDER until calibrated. -> run_session.py replaces this with seats.json when it exists.
 
 Placeholder values until calibrated on the real robot:
     python run_calibration.py --target lite        (records ticks + labels)
     python evaluate_offline.py fit --ticks ... --labels ...   (writes seats.json)
-When seats.json exists it is used instead. Commit seats.json; the chairs must not move afterwards.
+When seats.json exists it is used instead
 
 Angles are in degrees in the ROOM (world) frame, measured from the robot's
 neutral forward direction: 0 = straight ahead, + = robot's LEFT, - = robot's RIGHT.
@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 from typing import List, Tuple
 
-PLACEHOLDER_SEAT_AZIMUTHS_DEG: List[float] = [70.0, 0.0, -70.0]  # PLACEHOLDER - calibrate!
+PLACEHOLDER_SEAT_AZIMUTHS_DEG: List[float] = [70.0, 0.0, -70.0]  # PLACEHOLDER - see seats.json for real values
 
 SEATS_FILE = Path(__file__).resolve().parent.parent / "seats.json"
 

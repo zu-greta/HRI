@@ -1,10 +1,6 @@
 """Record the room's audio during a round, in sync with the robot's logs.
 
-Why the laptop microphone (or a USB microphone plugged into the laptop), not the
-robot's? Streaming the robot's audio would add load to the same Wi-Fi link that
-controls the robot. A laptop recording is just as good for annotation, and it is
-started by the session script on the SAME clock as the tick log, so no clap or
-manual offset is needed:
+laptop microphone recording:
 
     tick-log time = sidecar "offset_s" + time in the WAV file
 

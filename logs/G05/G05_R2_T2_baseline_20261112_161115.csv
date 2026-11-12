@@ -1,0 +1,66 @@
+time_iso,t_s,mono_s,group,condition,event,seat,detail
+2026-11-12T16:11:15.543,0.000,5851.004,G05_R2_T2,baseline,study_info,,group=G05 round=2 topic=2 order=B condition=baseline quiet_seat=2 baseline=balanced seed=3045363847
+2026-11-12T16:11:19.744,4.202,5855.206,G05_R2_T2,baseline,versions,,code=4cd489e-dirty prompt_audio=be15c1082c
+2026-11-12T16:11:19.744,4.202,5855.206,G05_R2_T2,baseline,animation,,animate=True gesture_scale=1.0 wobbling=True
+2026-11-12T16:11:19.949,4.406,5855.411,G05_R2_T2,baseline,recording_start,,file=G05_R2_T2_baseline_20261112_161115_audio.wav offset_s=5855.376
+2026-11-12T16:11:29.047,13.504,5864.508,G05_R2_T2,baseline,participants_introduced,,
+2026-11-12T16:11:29.049,13.507,5864.511,G05_R2_T2,baseline,detection_setup,,"attributor=hmm estimator=turns_decay seats=[55.5, -3.1, -57.5] placeholder_seats=False"
+2026-11-12T16:11:29.181,13.638,5864.643,G05_R2_T2,baseline,session_start,,policy=baseline_round_robin target=wireless topic=2 questions=6
+2026-11-12T16:11:30.070,14.527,5865.532,G05_R2_T2,baseline,robot_say_start,,intro
+2026-11-12T16:11:36.323,20.780,5871.784,G05_R2_T2,baseline,robot_say_end,,intro
+2026-11-12T16:11:36.324,20.781,5871.785,G05_R2_T2,baseline,robot_say_start,,t2_open
+2026-11-12T16:11:41.817,26.275,5877.279,G05_R2_T2,baseline,robot_say_end,,t2_open
+2026-11-12T16:11:41.953,26.411,5877.415,G05_R2_T2,baseline,listen_start,,
+2026-11-12T16:11:45.111,29.568,5880.572,G05_R2_T2,baseline,listen_end,,reason=silence waited_s=3.1 speech_s=0.0
+2026-11-12T16:11:45.112,29.569,5880.574,G05_R2_T2,baseline,decision,2,"activity=[0.0, 0.0, 0.0]"
+2026-11-12T16:11:45.970,30.428,5881.432,G05_R2_T2,baseline,robot_turn,2,
+2026-11-12T16:11:45.971,30.428,5881.432,G05_R2_T2,baseline,robot_say_start,2,addr_2
+2026-11-12T16:11:47.585,32.043,5883.047,G05_R2_T2,baseline,robot_say_end,2,addr_2
+2026-11-12T16:11:47.586,32.043,5883.047,G05_R2_T2,baseline,robot_say_start,2,t2_q1
+2026-11-12T16:11:51.652,36.109,5887.113,G05_R2_T2,baseline,robot_say_end,2,t2_q1
+2026-11-12T16:11:51.786,36.243,5887.247,G05_R2_T2,baseline,listen_start,,
+2026-11-12T16:11:56.533,40.990,5891.994,G05_R2_T2,baseline,listen_end,,reason=silence waited_s=4.7 speech_s=0.1
+2026-11-12T16:11:56.534,40.992,5891.996,G05_R2_T2,baseline,decision,3,"activity=[0.0, 0.0, 0.0]"
+2026-11-12T16:11:58.767,43.224,5894.228,G05_R2_T2,baseline,robot_turn,3,
+2026-11-12T16:11:58.767,43.225,5894.229,G05_R2_T2,baseline,robot_say_start,3,addr_3
+2026-11-12T16:12:00.457,44.915,5895.919,G05_R2_T2,baseline,robot_say_end,3,addr_3
+2026-11-12T16:12:00.457,44.915,5895.919,G05_R2_T2,baseline,robot_say_start,3,t2_q2
+2026-11-12T16:12:05.125,49.582,5900.586,G05_R2_T2,baseline,robot_say_end,3,t2_q2
+2026-11-12T16:12:05.126,49.584,5900.587,G05_R2_T2,baseline,listen_start,,
+2026-11-12T16:12:41.328,85.786,5936.789,G05_R2_T2,baseline,listen_end,,reason=silence waited_s=36.2 speech_s=19.5
+2026-11-12T16:12:41.330,85.788,5936.791,G05_R2_T2,baseline,decision,1,"activity=[0.0, 0.0, 26.07]"
+2026-11-12T16:12:42.148,86.606,5937.609,G05_R2_T2,baseline,robot_turn,1,
+2026-11-12T16:12:42.149,86.606,5937.609,G05_R2_T2,baseline,robot_say_start,1,addr_1
+2026-11-12T16:12:43.664,88.121,5939.125,G05_R2_T2,baseline,robot_say_end,1,addr_1
+2026-11-12T16:12:43.664,88.121,5939.125,G05_R2_T2,baseline,robot_say_start,1,t2_q3
+2026-11-12T16:12:48.109,92.566,5943.570,G05_R2_T2,baseline,robot_say_end,1,t2_q3
+2026-11-12T16:12:48.248,92.705,5943.709,G05_R2_T2,baseline,listen_start,,
+2026-11-12T16:12:59.951,104.408,5955.411,G05_R2_T2,baseline,listen_end,,reason=silence waited_s=11.6 speech_s=4.0
+2026-11-12T16:12:59.952,104.409,5955.412,G05_R2_T2,baseline,decision,3,"activity=[6.25, 0.0, 23.42]"
+2026-11-12T16:13:02.540,106.998,5958.001,G05_R2_T2,baseline,robot_turn,3,
+2026-11-12T16:13:02.541,106.998,5958.001,G05_R2_T2,baseline,robot_say_start,3,addr_3
+2026-11-12T16:13:04.337,108.795,5959.798,G05_R2_T2,baseline,robot_say_end,3,addr_3
+2026-11-12T16:13:04.338,108.795,5959.798,G05_R2_T2,baseline,robot_say_start,3,t2_q4
+2026-11-12T16:13:09.221,113.678,5964.681,G05_R2_T2,baseline,robot_say_end,3,t2_q4
+2026-11-12T16:13:09.353,113.811,5964.814,G05_R2_T2,baseline,listen_start,,
+2026-11-12T16:13:42.396,146.854,5997.857,G05_R2_T2,baseline,listen_end,,reason=silence waited_s=33.0 speech_s=21.9
+2026-11-12T16:13:42.398,146.855,5997.858,G05_R2_T2,baseline,decision,2,"activity=[4.89, 0.0, 47.16]"
+2026-11-12T16:13:43.300,147.758,5998.760,G05_R2_T2,baseline,robot_turn,2,
+2026-11-12T16:13:43.300,147.758,5998.760,G05_R2_T2,baseline,robot_say_start,2,addr_2
+2026-11-12T16:13:45.399,149.856,6000.859,G05_R2_T2,baseline,robot_say_end,2,addr_2
+2026-11-12T16:13:45.399,149.856,6000.859,G05_R2_T2,baseline,robot_say_start,2,t2_q5
+2026-11-12T16:13:49.474,153.932,6004.935,G05_R2_T2,baseline,robot_say_end,2,t2_q5
+2026-11-12T16:13:49.697,154.154,6005.157,G05_R2_T2,baseline,listen_start,,
+2026-11-12T16:14:03.385,167.843,6018.845,G05_R2_T2,baseline,listen_end,,reason=silence waited_s=13.6 speech_s=4.8
+2026-11-12T16:14:03.386,167.844,6018.846,G05_R2_T2,baseline,decision,1,"activity=[4.33, 7.35, 41.81]"
+2026-11-12T16:14:05.697,170.155,6021.157,G05_R2_T2,baseline,robot_turn,1,
+2026-11-12T16:14:05.697,170.155,6021.157,G05_R2_T2,baseline,robot_say_start,1,addr_1
+2026-11-12T16:14:07.172,171.630,6022.632,G05_R2_T2,baseline,robot_say_end,1,addr_1
+2026-11-12T16:14:07.173,171.630,6022.632,G05_R2_T2,baseline,robot_say_start,1,t2_q6
+2026-11-12T16:14:10.851,175.308,6026.311,G05_R2_T2,baseline,robot_say_end,1,t2_q6
+2026-11-12T16:14:10.851,175.308,6026.311,G05_R2_T2,baseline,listen_start,,
+2026-11-12T16:14:28.471,192.929,6043.931,G05_R2_T2,baseline,listen_end,,reason=silence waited_s=17.6 speech_s=6.5
+2026-11-12T16:14:29.307,193.764,6044.766,G05_R2_T2,baseline,robot_say_start,,outro
+2026-11-12T16:14:32.541,196.999,6048.001,G05_R2_T2,baseline,robot_say_end,,outro
+2026-11-12T16:14:32.542,196.999,6048.001,G05_R2_T2,baseline,session_end,,"times_addressed=[2, 2, 2]"
+2026-11-12T16:14:33.954,198.411,6049.413,G05_R2_T2,baseline,recording_end,,seconds=193.8 peak=0.82 stream_problems=0

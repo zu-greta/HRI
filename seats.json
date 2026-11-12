@@ -1,8 +1,8 @@
 {
   "seat_azimuths_deg": [
-    54.6,
-    2.5,
-    -48.4
+    55.5,
+    -3.1,
+    -57.5
   ],
-  "note": "fitted from CALIB_calibration_20261110_151627_ticks.csv"
+  "note": "fitted from CALIB_calibration_20261112_133633_ticks.csv"
 }

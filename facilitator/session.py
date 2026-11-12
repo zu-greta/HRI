@@ -6,7 +6,7 @@ One round:
           -> say their number ("Participant two.") -> ask the question ]
     listen until quiet (answer to the last question) -> outro
 
-Detection (the listener) runs in BOTH conditions, so the robot's estimate is logged for
+Detection (the listener) runs in both conditions, so the robot's estimate is logged for
 baseline rounds too; only the adaptive policy uses it to decide.
 
 Clocks: `clock` must be the same clock the listener, the tick log and the event log's

@@ -2,7 +2,7 @@ reachy-mini-workspace/
 .venv/
 */__pycache__/
 .DS_Store
-logs/
+logs/checks/
 data/
 videos/
 *.mp4

@@ -1,6 +1,6 @@
 {
-  "angle_sigma_deg": 10.28,
-  "outlier_rate": 0.077,
-  "vad_miss_rate": 0.671,
-  "vad_false_alarm_rate": 0.348
+  "angle_sigma_deg": 6.0,
+  "outlier_rate": 0.054,
+  "vad_miss_rate": 0.34,
+  "vad_false_alarm_rate": 0.362
 }
