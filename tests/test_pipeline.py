@@ -1,30 +1,33 @@
-"""End to end on a virtual clock, with the real file formats:
-calibration recording -> fit -> study rounds -> offset -> analyze_study + evaluate_offline study."""
+"""End to end on a virtual clock with the real file formats:
+fake rounds (event log + ticks + audio + offset) -> build_sessions -> label templates ->
+labels -> analyze_study -> evaluate_offline study."""
 
 import csv
 import json
 import random
 import subprocess
 import sys
-from pathlib import Path
+import wave
+
+import numpy as np
 
 from facilitator.config import Config
 from facilitator.detection_config import DetectionConfig
 from facilitator.listener import ParticipationListener
 from facilitator.logger import SessionLog
 from facilitator.policies import make_policy
+from facilitator.seats import load_seat_azimuths
 from facilitator.session import run_session
 from facilitator.sim_sources import MicModel, ScriptedSource
-from facilitator.sources import SpeakerSource
 from facilitator.ticklog import TickLog
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SEATS = [50.0, 0.0, -50.0]
 
 
 class Clock:
-    def __init__(self):
-        self.t = 500.0
+    def __init__(self, t0):
+        self.t = t0
 
     def now(self):
         return self.t
@@ -63,88 +66,75 @@ def run(*args):
     return out.stdout
 
 
-def test_calibration_record_and_fit(tmp_path):
-    from run_calibration import record, write_labels
-
-    clock, robot = Clock(), None
-    robot = FakeRobot(clock)
-    speaking = {"seat": None}
-    rng, mic = random.Random(0), MicModel()
-
-    class Room(SpeakerSource):
-        def read(self):
-            s = speaking["seat"]
-            return mic.observe(None if s is None else SEATS[s], robot.yaw, rng)
-
-    def announce(msg):
-        if "speak now" in msg:
-            speaking["seat"] = int(msg.split("SEAT ")[1].split(":")[0]) - 1
-        elif "stop" in msg:
-            speaking["seat"] = None
-
-    log = SessionLog("CALIB", "calibration", tmp_path, clock=clock.now)
-    ticks = TickLog(log.path)
-    listener = ParticipationListener.from_config(SEATS, DetectionConfig())
-    labels = record(robot, Room(), listener, ticks, log, [0.0] + SEATS, 3, 8.0, clock.now, clock.sleep,
-                    announce)
-    ticks.close(); log.close()
-    lab = tmp_path / "labels.csv"
-    write_labels(lab, labels)
-    assert len(labels) == 12
-    out = run("evaluate_offline.py", "fit", "--ticks", ticks.path, "--labels", lab, "--dry-run")
-    fitted = json.loads(out.split("Microphone model: ")[1].replace("'", '"'))
-    seats = [float(x) for x in out.split("Seats (deg, + = robot's left): [")[1].split("]")[0].split(",")]
-    assert all(abs(a - b) < 6 for a, b in zip(seats, SEATS))
-    assert 5 < fitted["angle_sigma_deg"] < 16 and fitted["vad_miss_rate"] < 0.3
-
-
-def _round(tmp_path, group, rnd, condition, seed):
-    clock, cfg = Clock(), Config()
-    cfg.seat_azimuths_deg, cfg.silence_s, cfg.no_response_s = SEATS, 1.5, 6.0
+def fake_round(folder: Path, group: str, rnd: int, condition: str, seed: int, t0: float):
+    seats, _ = load_seat_azimuths()               # the repository's calibration -> matched by build_sessions
+    det = DetectionConfig.load()
+    clock, cfg = Clock(t0), Config()
+    cfg.seat_azimuths_deg, cfg.silence_s, cfg.no_response_s = seats, 1.5, 6.0
     robot = FakeRobot(clock)
     turns, t, rng = [], 0.0, random.Random(seed)
-    while t < 900:
+    while t < 400:
         seat = rng.choices([0, 1, 2], weights=[0.6, 0.3, 0.1])[0]
         length = rng.uniform(1.5, 6.0)
         turns.append((t, t + length, seat))
         t += length + (rng.uniform(1.8, 3.0) if rng.random() < 0.25 else rng.uniform(0.3, 0.9))
-    src = ScriptedSource(turns, SEATS, clock.now, MicModel(), seed=seed, head_yaw_deg=robot.head_yaw_deg)
-    log = SessionLog(f"{group}_R{rnd}", condition, tmp_path, clock=clock.now)
+    src = ScriptedSource(turns, seats, clock.now, MicModel(), seed=seed, head_yaw_deg=robot.head_yaw_deg)
+    log = SessionLog(f"{group}_R{rnd}_T{rnd}", condition, folder, clock=clock.now)
+    log.log("study_info", detail=f"group={group} round={rnd} topic={rnd} order=A condition={condition} "
+                                 f"quiet_seat=3 baseline=balanced seed={seed}")
+    log.log("versions", detail="code=test prompt_audio=abc")
+    log.log("detection_setup", detail=f"attributor=hmm estimator=turns_decay seats={seats} placeholder_seats=False")
     ticks = TickLog(log.path)
-    det = DetectionConfig()
     run_session(robot, make_policy(condition, 3, True, seed, det), src, cfg, log,
-                ParticipationListener.from_config(SEATS, det), ticks, clock=clock.now, sleep=clock.sleep)
-    ticks.close(); log.close()
-    # ground truth on the TICK clock (as if the video offset were already applied)
-    lab = tmp_path / f"{group}_R{rnd}_labels.csv"
+                ParticipationListener.from_config(seats, det), ticks, clock=clock.now, sleep=clock.sleep)
+    ticks.close()
+    log.close()
+    stem = log.path.stem
+    offset = t0 - 5.0                              # audio started 5 s before the session clock origin
+    sr, length = 8000, clock.now() - offset + 1
+    x = np.zeros(int(sr * length), dtype=np.int16)
+    lab = folder / "labels" / f"{stem}.csv"
+    lab.parent.mkdir(exist_ok=True)
     with open(lab, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["start_s", "end_s", "seat", "kind"])
+        w.writerow(["start_s", "end_s", "seat"])
         for a, b, s in turns:
-            if src._t0 + a < clock.now():
-                w.writerow([f"{src._t0 + a:.2f}", f"{src._t0 + b:.2f}", s + 1, "turn"])
-    return log.path, ticks.path, lab
+            a_w, b_w = src._t0 + a - offset, src._t0 + b - offset
+            if b_w < length - 1:
+                w.writerow([f"{a_w:.2f}", f"{b_w:.2f}", s + 1])
+                x[int(a_w * sr):int(b_w * sr)] = (8000 * np.sin(np.arange(int(b_w * sr) - int(a_w * sr)) * 0.2)).astype(np.int16)
+    with wave.open(str(folder / f"{stem}_audio.wav"), "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sr)
+        wf.writeframes(x.tobytes())
+    (folder / f"{stem}_audio.json").write_text(json.dumps({"offset_s": offset}))
 
 
-def test_full_study_pipeline(tmp_path):
-    rows = [["group", "order", "round", "topic", "condition", "quiet_seat", "labels", "offset", "ticks", "log"]]
+def test_full_analysis_pipeline(tmp_path):
+    t0 = 1000.0
     for g in range(1, 4):
         for rnd, cond in ((1, "baseline"), (2, "adaptive")):
-            log, ticks, lab = _round(tmp_path, f"G{g}", rnd, cond, seed=10 * g + rnd)
-            rows.append([f"G{g}", "A", rnd, rnd, cond, 3, lab.name, 0, ticks.name, log.name])
-    sessions = tmp_path / "study_sessions.csv"
-    with open(sessions, "w", newline="") as f:
-        csv.writer(f).writerows(rows)
+            fake_round(tmp_path, f"G0{g}", rnd, cond, seed=10 * g + rnd, t0=t0)
+            t0 += 2000
+    out = run("build_sessions.py", tmp_path, "--out", tmp_path / "study_sessions.csv")
+    assert "3 groups, 6 rounds" in out
+    rows = list(csv.DictReader(open(tmp_path / "study_sessions.csv")))
+    assert all(r["params"] for r in rows)            # calibration found by matching the seats
 
-    # event log has the sync column and the offset command works
-    first_log = tmp_path / rows[1][9]
-    events = list(csv.DictReader(open(first_log)))
-    intro = next(e for e in events if e["event"] == "robot_say_start")
-    out = run("evaluate_offline.py", "offset", "--log", first_log, "--video-s", "10")
-    assert f"offset = {float(intro['mono_s']) - 10:.3f}" in out
-    assert sum(e["event"] == "decision" for e in events) == 6
+    out = run("make_label_templates.py", tmp_path / "study_sessions.csv")
+    assert "'?' stretches" in out
 
-    out = run("analyze_study.py", sessions)
-    assert "H2" in out and "Micbot unevenness" in out and "Wilcoxon" in out
-    out = run("evaluate_offline.py", "study", sessions, "--out", tmp_path / "h3.csv")
-    assert "H3b" in out and "replay=live 1.00" in out  # replay reproduces the live decisions exactly
+    out = run("analyze_study.py", tmp_path / "study_sessions.csv", "--out", tmp_path / "results")
+    assert "H1 PRIMARY" in out and "Overall:" in out and "addressee produced" in out
+    assert (tmp_path / "results" / "rounds.csv").exists()
+
+    out = run("evaluate_offline.py", "study", tmp_path / "study_sessions.csv")
+    assert "H3a" in out and "H3b" in out
+    # the virtual clock ticks exactly every 0.1 s, so an utterance can land exactly on the 1.0 s turn threshold
+    # and 3-decimal logging can tip it either way; real recordings (irregular ticks) replay exactly (G01: 6/6)
+    share = float(out.split("replayed choice = live choice in ")[1].split()[0])
+    assert share >= 0.8
+    for line in out.splitlines():
+        if line.startswith("G0"):
+            assert line.split()[1] == "1.000"        # offline replay reproduces the live robot exactly

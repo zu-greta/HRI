@@ -3,10 +3,6 @@
     python check_turns.py --target wireless                      # seats from seats.json / placeholders
     python check_turns.py --target wireless --angles 50 -50 70 -70
     python check_turns.py --target wireless --body-share 1.0      # whole body faces the person
-
-For each angle it prints what was asked and what the robot reached:
-    head (room) = where the face points, in the room;  body = how far the base rotated.
-Watch the robot while it runs: does the face point at each person's chair?
 """
 
 import argparse

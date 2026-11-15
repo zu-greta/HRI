@@ -9,11 +9,6 @@
 First time:  pip install piper-tts
              python -m piper.download_voices --download-dir voices en_US-lessac-medium
 Listen to the voices:  python make_prompts.py --sample   (writes voices/sample_<voice>.wav for each model)
-
-Pre-recorded prompts are a controlled variable (same content, same voice in all conditions):
-generate them ONCE with ONE voice and ONE set of style settings, then commit prompts/*.wav and
-prompts/manifest.json. Never regenerate during data collection. Piper gives the same voice on
-every OS; the voice models in voices/ are not committed.
 """
 
 import argparse

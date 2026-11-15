@@ -1,4 +1,5 @@
-"""See what a session looks like: a SHORT round with a simulated 3-person group.
+"""
+quick testing for session using simulation (no real robot, no real people)
 
     python sim_scenario.py --no-robot --fast             # no simulator needed, finishes in seconds
     python sim_scenario.py                               # watch it in the MuJoCo simulator (real time)
@@ -9,24 +10,7 @@
 Before the simulator run, start it in another terminal:
     mjpython run_sim.py        # macOS   (Windows/Linux: python run_sim.py)
     (or start the simulator from Reachy Mini Control)
-
-What is real and what is simulated
-  REAL       the study code: run_session() (the fixed script), the listener (HMM attribution +
-             turn-decay estimate), the policies, the event log and the tick log.
-  SIMULATED  the people. Alex (seat 1) talks a lot, Ben (seat 2) is average, Chloe (seat 3) is quiet.
-             They react to the robot: whoever the robot addresses answers, then Alex often jumps in.
-             The robot is NOT told who speaks: it gets simulated head-mounted microphone readings
-             (noise, outliers, missed speech, front/back mirroring, the array turning with the head)
-             and has to work it out with the real detection code.
-  SHORTENED  3 addressed questions instead of 6, 1.5 s of silence ends a turn instead of 3 s.
-  VOICES     in real time (not --fast, not --mute) everything is spoken on this computer:
-             the robot plays prompts/<id>.wav (the study audio, from make_prompts.py; generated
-             into a temporary folder if missing) and each person has their own computer voice.
-             macOS: built in. Windows: pyttsx3 (in requirements.txt). Linux: sudo apt install
-             espeak-ng. If no voice or audio player is found it falls back to text only.
-
-Logs go to logs/scenario/ (same format as a real round). This file is a demo; it is not used
-by the study.
+DEMO file - not used in the study
 """
 
 import argparse

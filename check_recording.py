@@ -1,11 +1,8 @@
-"""Test the recording microphone before participants arrive (5 seconds).
+"""Test the recording microphone before participants arrive
 
     python check_recording.py                  # default input (the laptop microphone)
     python check_recording.py --list           # show all microphones
     python check_recording.py --device "USB"   # a specific microphone (part of its name)
-
-Speak normally from a participant's chair while it records. It saves a short test
-file and tells you whether the level looks right.
 """
 
 import argparse
@@ -32,7 +29,7 @@ def main() -> None:
     rec = AudioRecorder(folder / "check.csv", device=args.device)
     try:
         rec.start()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  
         raise SystemExit(f"Could not open the microphone: {exc}\n"
                          "macOS: System Settings > Privacy & Security > Microphone -> allow your terminal.")
     print(f"Recording {args.seconds:.0f} s - speak from a participant's chair ...")

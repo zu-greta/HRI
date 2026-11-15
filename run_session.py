@@ -1,4 +1,4 @@
-"""Run one facilitation session (one round of the study).
+"""Run one facilitation session (one round of the study)
 
     python run_session.py                                  # baseline, simulator, laptop microphone
     python run_session.py --condition adaptive --source scripted   # simulator, simulated group
@@ -9,12 +9,6 @@
 --record records the room with this computer's microphone (or --record-device "USB"),
 saved in the folder you run this command from as <log name>_audio.wav (+ _audio.json
 with the sync offset). Use --record-dir to save somewhere else.
-
-For a quick look at a whole session without any setup: python sim_scenario.py --no-robot --fast
-
-The robot listens after each question and speaks again once the group goes quiet.
-It hears through its own microphones on the real robot, and through this computer's
-microphone in the simulator (which has none). --source overrides this.
 """
 
 import argparse
@@ -30,7 +24,7 @@ from facilitator.seats import load_seat_azimuths
 from facilitator.sim_sources import MicModel, ScriptedSource  
 from facilitator.ticklog import TickLog  
 from facilitator.logger import SessionLog
-from facilitator.recorder import AudioRecorder  # [RECORDING]
+from facilitator.recorder import AudioRecorder 
 from facilitator.policies import make_policy
 from facilitator.robot_io import TARGETS, Robot
 from facilitator.session import run_session
@@ -91,7 +85,7 @@ def code_version() -> str:
         dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=root,
                                capture_output=True, text=True, timeout=5).stdout.strip()
         return (rev or "unknown") + ("-dirty" if dirty else "")
-    except Exception:  # noqa: BLE001 - git missing
+    except Exception: 
         return "unknown"
 
 
@@ -124,10 +118,8 @@ def main() -> None:
                    help="baseline randomisation: balanced (default, study) or uniform (see PROJECT_OVERVIEW.md)")
     p.add_argument("--speech", choices=("auto", "robot", "laptop", "silent"), default="auto",
                    help="where the voice plays. auto: laptop in the simulator, robot speaker on the real robot")
-    # choose detection methods (defaults: our method; the alternatives exist for comparison)
     p.add_argument("--attributor", choices=("hmm", "nearest"), help="who-is-speaking method (default: hmm)")
     p.add_argument("--estimator", choices=("turns_decay", "cumulative"), help="activity measure (default: turns_decay)")
-    # [RECORDING] room audio for annotation, saved next to the logs and synced with them
     p.add_argument("--record", action="store_true",
                    help="record the room with this computer's microphone (<log>_audio.wav, ~2 MB/min)")
     p.add_argument("--record-device", help="microphone to record with (name or part of it; see check_recording.py --list)")
@@ -183,7 +175,7 @@ def main() -> None:
         recorder = AudioRecorder(log.path, device=args.record_device, folder=Path(args.record_dir).expanduser())
         try:
             recorder.start()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc: 
             robot.close()
             log.log("recording_failed", detail=str(exc))
             log.close()

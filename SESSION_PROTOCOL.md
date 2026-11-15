@@ -1,8 +1,8 @@
-# Session protocol: participation-balancing study (Reachy Mini Wireless)
+# Session protocol for experiment running
 
-Session step by step guide.
+Session step by step guide:
 
-- One group = 3 participants and two rounds of about 8 minutes (NOTE: rounds are not necessarily 8min so we should note it down in the report!): **random** and **balancing**, in the order given by the schedule. Allow **about 20 minutes per group**.
+- One group = 3 participants and two rounds of about 8 minutes: **random** and **balancing**, in the order given by the schedule. 
 - In the commands: *random* = `--condition baseline`, *balancing* = `--condition adaptive`.
 
 ---
@@ -46,7 +46,7 @@ source .venv/bin/activate
 ## C. calibration
 
 ### C1. room layout
-1. Put the robot on the table, facing the middle chair. **Mark its position and facing direction with tape.**
+1. Put the robot on the table, facing the middle chair. Mark its position and facing direction with tape
 2. Put three chairs about 1 m from the robot: **seat 1 on the robot's left (+50°)**, **seat 2 straight ahead**, **seat 3 on the robot's right (−50°)**. Mark each chair with tape. While facing the robot, Seat 1 is the rightmost chair, Seat 2 is the middle, and Seat 3 is the leftmost.
 3. Check that the robot faces each chair:
    ```bash
@@ -76,7 +76,7 @@ Calibrate once before the first group, don't move the chairs afterwards.
    - **Microphone model:** `angle_sigma_deg` roughly 5–25; `vad_false_alarm_rate` below about 0.15. A high false-alarm rate means the room was noisy or someone spoke during a silent part, so run it again.
 5. If the numbers look right, run the same command **without `--dry-run`**. This writes `seats.json` and `detection_params.json` into `<REPO>`.
 6. **Save the calibration:** push the `seats.json detection_params.json` files to GitHub
-   Keep the two `CALIB_calibration_*` files too: copy them to `~/study_data/CALIB/`.
+   Keep the two `CALIB_calibration_*` files too: copy them to `/logs/CALIB/`.
 7. Check with `python check_turns.py --target wireless`: the robot should face each chair. `run_session.py` no longer prints the "PLACEHOLDER seat angles" warning.
 
 ### C4. Test round and pilot
@@ -102,46 +102,7 @@ G01–G04 are order A (random first); G05–G07 are order B (balancing first).
 
 ---
 
-## F. labelling and analysis - [TODO]
-
-### F1. Label who spoke when (for every round)
-For each `…_audio.wav` in `~/study_data/G0X/`:
-1. Open it in Audacity and label **every stretch of speech** with the seat number (Cmd+B, type 1/2/3, Enter). Use the "I'm in seat …" introductions at the start to recognise the voices. Don't label the robot.
-   - **Agreed rules:** label all speech of about 0.3 s or longer, including short "yeah"s. When two people talk at once, label both stretches.
-2. File → Export → Export Labels… → `~/study_data/G01/G01_R1_labels.txt`.
-3. Convert:
-   ```bash
-   python audacity_labels_to_csv.py ~/study_data/G01/G01_R1_labels.txt ~/study_data/labels/G01_R1.csv
-   ```
-4. **Quality check:** two people each label the **same 2 rounds** separately, saving them as `…_labels_B.txt`, so the team can report their agreement.
-
-### F2. Fill in the study table
-Create `~/study_data/study_sessions.csv` with one row per round (14 rows). Paths are relative to `~/study_data`; **leave `offset` empty** (it's read from the `_audio.json`):
-```
-group,order,round,topic,condition,quiet_seat,labels,offset,ticks,log,audio
-G01,A,1,1,baseline,1,labels/G01_R1.csv,,G01/G01_R1_T1_baseline_<time>_ticks.csv,G01/G01_R1_T1_baseline_<time>.csv,G01/G01_R1_T1_baseline_<time>_audio.wav
-G01,A,2,2,adaptive,1,labels/G01_R2.csv,,G01/G01_R2_T2_adaptive_<time>_ticks.csv,G01/G01_R2_T2_adaptive_<time>.csv,G01/G01_R2_T2_adaptive_<time>_audio.wav
-```
-
-### F3. Questionnaire table
-Export the questionnaire answers as `~/study_data/questionnaire.csv` (fairness = the mean of the fairness items):
-```
-group,condition,participant,fairness
-G01,baseline,G01-P1,4.2
-G01,adaptive,G01-P1,4.6
-```
-
-### F4. Run the analysis
-```bash
-cd ~/Documents/HRI && source .venv/bin/activate
-python analyze_study.py ~/study_data/study_sessions.csv --questionnaire ~/study_data/questionnaire.csv \
-  --out ~/study_data/results/study.csv
-```
-This prints the evenness (Gini) per round, the comparison of random vs balancing per group with the statistical test, the check by order A/B, how often the robot recognised the right speaker (per seat), and the fairness ratings. Share the printout and `results/study.csv` with the team.
-
----
-
-## G. study commands
+## D. study commands
 
 ### checks
 python check_turns.py --target wireless
