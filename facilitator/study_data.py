@@ -122,9 +122,10 @@ class LogInfo:
 
     @property
     def all_questions(self) -> bool:
-        """NOTES: we ran into network issues while conducting the study - some rounds did not finish officially but we got the results
-        All 6 addressed questions were asked (the round's content is complete, even if the program
-        crashed afterwards, e.g. during the outro or while closing)."""
+        """All 6 addressed questions were asked.
+
+        The round's content counts as complete even if the program crashed afterwards (some rounds
+        hit network failures during the outro or while closing)."""
         return self.completed or len(self.decisions) >= 6
 
 

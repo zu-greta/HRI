@@ -36,7 +36,7 @@ def main() -> None:
     p.add_argument("--only", nargs="*", help="only these prompt ids")
     p.add_argument("--sample", action="store_true", help="write one sample sentence per downloaded voice and exit")
     args = p.parse_args()
-    if args.engine is None:  # keeps the old `--voice Samantha` / `--voice Zira` commands working
+    if args.engine is None:
         args.engine = "system" if args.voice and not piper_model_path(args.voice).exists() else "piper"
         if args.engine == "system":
             print(f"'{args.voice}' is not a Piper voice in voices/ -> using this computer's built-in voice.")

@@ -123,11 +123,3 @@ def truth_at(labels: List[Tuple[float, float, int]], t: float) -> Optional[int]:
         if a <= t < b:
             return s
     return None
-
-
-def is_overlap(labels: List[Tuple[float, float, int]], t: float) -> bool:
-    """True if two different seats are labelled as speaking at time t.
-
-    Overlapping speech has no single correct seat, so H2/H3 exclude these ticks.
-    """
-    return len({s for a, b, s in labels if a <= t < b}) > 1

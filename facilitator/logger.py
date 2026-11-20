@@ -4,7 +4,7 @@ Columns:
   time_iso   wall-clock time (for matching with notes / the run sheet)
   t_s        seconds since the log was opened (wall clock)
   mono_s     time.monotonic() at the event = the SAME clock as the tick log (*_ticks.csv)
-             -> use it to line up events, ticks and video (see PROJECT_OVERVIEW.md, "Clock sync")
+             -> use it to line up events, ticks and audio
   group, condition, event, seat (1-based), detail
 """
 

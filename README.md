@@ -1,6 +1,6 @@
 # HRI - Human-Robot Interaction Project
 
-## Title: TODO
+## Title: [PROJECT TITLE]
 
 Team: Mina Pirati, Alyssa Duranovic, Greta Zu
 Robot: Reachy Mini - physical

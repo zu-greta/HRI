@@ -27,13 +27,9 @@ class ActivityEstimator:
 
     def __init__(self, n_seats: int):
         self.n_seats = n_seats
-        self.words = [0] * n_seats  # from speech-to-text (logged; not used in the score yet)
 
     def update(self, seat: Optional[int], dt: float, now: float) -> None:
         raise NotImplementedError
-
-    def add_words(self, seat: int, n_words: int, now: float) -> None:
-        self.words[seat] += n_words
 
     def scores(self, now: float) -> List[float]:
         raise NotImplementedError

@@ -1,6 +1,5 @@
-# TODO - FIND A TITLE
+# [PROJECT TITLE]
 
-TODO: finalize this document
 ---
 
 ## 1. The project
@@ -109,7 +108,6 @@ python -m pytest -q tests
 - The naive nearest-seat rule then gives that seat's speech to the **middle seat** (or to nobody in G01, facing seat 3).
 - This is common: the robot faced a side seat after 28/42 questions in random rounds and 33/42 in balancing rounds.
 - The HMM models the mirroring. In that pose its two candidates are 12.6° apart (σ 6.0°) in the main room and 24.9° apart (σ 10.3°) in G01's room.
-- Full table: implementation notes section 2.3.
 
 ---
 
@@ -130,8 +128,6 @@ python -m pytest -q tests
 - Replaying our HMM reproduced the live attribution on 100 % of readings.
 - It also reproduced all 46 live balancing decisions.
 - That is why the Micbot comparison is fair without a third live condition.
-
-Equations and rationale: implementation notes section 2.4.
 
 ### 4.1 Calibration (frozen per room)
 
@@ -196,7 +192,7 @@ The real data confirmed the attribution advantage but not the decision advantage
 
 | File | Purpose |
 |---|---|
-| `setup.sh` / `requirements.txt` | Creates `.venv` and installs dependencies |
+| `setup.sh` / `setup.ps1` / `requirements.txt` | Creates `.venv` and installs dependencies (macOS/Linux / Windows) |
 | `make_prompts.py` | Generates the prompt wavs + `manifest.json` once; the wavs are committed |
 | `check_setup.py` | Python/SDK versions, daemon reachable + same version, microphone direction available |
 | `check_turns.py` | Turns to each seat; prints commanded vs reached head and body yaw (`/api/state/full`) |
@@ -213,7 +209,6 @@ The real data confirmed the attribution advantage but not the decision advantage
 | `make_label_templates.py` | Audacity starting track per recording: robot prompts from the log, seat introductions, loud stretches marked "?"; **no robot guess** of who spoke |
 | `audacity_labels_to_csv.py` | Audacity export → `start_s,end_s,seat`; warns about any "?" left |
 | `check_labels.py` | Label checks: format, duplicates, overlap with robot speech, long overlaps, coverage, H2 with edges shrunk by 0.25 s |
-| `label_agreement.py` | Cohen's kappa between two annotators on 0.1 s frames (ready, not used: single annotator) |
 | `analyze_study.py` | Participant study, sections A–H (section 7). `--only-complete` = primary analysis; `--questionnaire`, `--seat-map` add fairness |
 | `evaluate_offline.py study` | Offline comparison: replay check, H3a (accuracy, side vs middle, false speech), H3b (three "truly least active" definitions, McNemar) |
 | `evaluate_offline.py sim` / `replay` | Pre-study simulation per room; replay of one recording against its labels |
@@ -224,11 +219,17 @@ The real data confirmed the attribution advantage but not the decision advantage
 
 | File | Purpose |
 |---|---|
-| `facilitator/sim_sources.py` | `MicModel`, `ScriptedSource`; `iter_ticks`, `ReplaySource`, `load_labels`, `truth_at`, `is_overlap` |
+| `facilitator/sim_sources.py` | `MicModel`, `ScriptedSource`; `iter_ticks`, `ReplaySource`, `load_labels`, `truth_at` |
 | `facilitator/simulation.py` | Simulated groups, `METHODS`, `gini()` |
+| `run_sim.py` | Starts the Reachy Mini MuJoCo simulator in a light mode (no media, no wake-up animation) |
 | `sim_scenario.py` | Short demo session with simulated people in the Reachy Mini simulator (checks the simulator on :8000 first; caches voices) |
 | `tests/test_detection.py` | Geometry, mirroring, HMM, estimators, policies |
-| `tests/test_study.py` | Balanced random (each seat exactly 2 of 6; uniform random would skip someone ~26 % of the time), Gini, label and session loading |
+| `tests/test_estimator.py` | Micbot-style cumulative vs our turn-based decayed estimate |
+| `tests/test_policies.py` | Balanced random baseline and the adaptive policy |
+| `tests/test_session.py` | A whole session with a fake robot |
+| `tests/test_sources.py` | Speech sources (robot direction, laptop mic, keyboard) without hardware |
+| `tests/test_speech.py`, `tests/test_animation.py`, `tests/test_recorder.py` | Prompt playback, talking gestures, room recording without sound hardware |
+| `tests/test_offline.py` | Tick log → replay → fit, and the simulation comparison |
 | `tests/test_pipeline.py` | End-to-end on fake rounds: logs + labels → `build_sessions` → `analyze_study` → `evaluate_offline study` |
 | `tests/test_audacity_labels.py` | Label conversion |
 
@@ -357,7 +358,6 @@ The scripts read the questionnaire workbook but do not write to it.
 9. **Ground truth:** single annotator, not blind to condition (file names show it), one laptop microphone.
 10. **Topic tied to round;** order A/B unbalanced (4/3).
 11. **Same code version, uncommitted changes:** every round ran commit `4cd489e`, marked `-dirty` in the logs.
-12. **Design report:** section 1.3 currently says "uniformly at random"; change it to "balanced random".
 
 ---
 
